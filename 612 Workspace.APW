@@ -120,7 +120,7 @@
 <SysID>0</SysID>
 <TransSerial>COM1,115200,8,None,1,None</TransSerial>
 <TransModem>COM1,38400,8,None,1,None</TransModem>
-<TransTCPIP>192.168.1.100:1319:1:Clarian Office</TransTCPIP>
+<TransTCPIP>192.168.1.100:1319:1:612NetLinx::</TransTCPIP>
 <VirtualNetLinxMasterFlag>0</VirtualNetLinxMasterFlag>
 <VNMRestoreIPSettings>0.0.0.0:1319:1</VNMRestoreIPSettings>
 <VNMSystemID>1</VNMSystemID>
@@ -148,10 +148,6 @@
 </File>
 <File CompileType="None" Type="Include"><Identifier>nAMX_QUEUE</Identifier>
 <FilePathName>Include\nAMX_QUEUE.axi</FilePathName>
-<Comments></Comments>
-</File>
-<File CompileType="None" Type="Include"><Identifier>Polycom VS4000</Identifier>
-<FilePathName>Include\Polycom VS4000.axi</FilePathName>
 <Comments></Comments>
 </File>
 <File CompileType="None" Type="Other"><Identifier>U OF I 612 614_MRC_DL11031341-2-28</Identifier>
