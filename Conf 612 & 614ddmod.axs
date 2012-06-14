@@ -11,7 +11,7 @@ PROGRAM_NAME='Conf 612 & 614'
 DEFINE_DEVICE
 dvAudia1 	= 5001:1:0	//Biamp Nexia CS Straight Thru Cable 38400 Baud.				
 dvMatrix  	= 5001:2:0	//Extron 450
-dvProj612   	= 5001:3:0	//Proxima C450 
+dvProj612   	= 5001:3:0	//Epson Powerlite G5750 
 dvProj614Rt   	= 5001:4:0	//Proxima C450 Right side as looking at Screen
 dvProj614Lt   	= 5001:5:0	//Proxima C450 Left side as looking at Screen
 dvScaler614 	= 5001:6:0	//Extron DVS304A
