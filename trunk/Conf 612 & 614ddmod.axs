@@ -17,8 +17,6 @@ dvProj614Lt   	= 5001:5:0	//Proxima C450 Left side as looking at Screen
 dvScaler614 	= 5001:6:0	//Extron DVS304A
 dvScaler612 	= 5001:7:0	//Extron DVS304A
 dvRelay	  	= 5001:8:0	//Relay for Rack Power.
-dvCombo614  	= 5001:9:0	//Panasonic AG-VP320 VCR/DVD
-dvCombo612  	= 5001:10:0	//Panasonic AG-VP320 VCR/DVD
 dvTp614	  	= 10001:1:0   	//MVP-8400 in the room with 1 Projectors.
 dvTp612	  	= 10005:1:0   	//MVP-8400 in the room with 2 Projector.
 dvTp614Combo 	= 10001:2:0   	//MVP-8400 port 2 to control Combo Deck
@@ -132,10 +130,8 @@ dev dvProj[] =
 {
     dvProj612,dvProj614Lt,dvProj614Rt
 }
-dev dvBothCombos[] =
-{
-    dvCombo612,dvCombo614
-}
+
+
 integer SystemPower
 integer nCurrentSource[2]	//1st location is 612, 2nd is 614.
 integer nPodiumLocation[2]
@@ -203,8 +199,7 @@ DEFINE_CALL 'Power Relay'(integer Relay,integer nRoom)	//1 = 612 2 = 614
 	    ON[dvRelay,PowerRelay4]
 	    Wait 30
 	    {
-		Pulse[dvCombo612,9]
-		Pulse[dvCombo614,9]
+		
 	    }
 	}
     }
@@ -382,18 +377,7 @@ DEFINE_CALL 'Proj Control'(integer Proj_Num, char Proj_Control[10]) //Projector 
     }
 }
 
-DEFINE_CALL 'Scaler 612'(integer nIn,integer nOut)
-{
-    //send_string dvScaler612,"itoa(nIn),'&'"	//Video Only
-    Call 'QUEUE ADD'(dvScaler612,"itoa(nIn),'&'",5,0)
-    //send_string dvScaler612,"itoa(nIn),'*',itoa(nOut),'!'"	//Audio and Video
-    SEND_STRING 0:1:0,"'dvScaler612 IN ',itoa(nIn),' to OUT ',itoa(nOut),13,10"
-}
-DEFINE_CALL 'Scaler 614'(integer nIn, integer nOut)
-{
-    Call 'QUEUE ADD'(dvScaler614,"itoa(nIn),'&'",5,0)
-    SEND_STRING 0:1:0,"'dvScaler614 IN ',itoa(nIn),' to OUT ',itoa(nOut),13,10"
-}
+
 DEFINE_CALL 'Matrix'(integer nIn,integer nOut,Char Clvl)	//! = A&V, & = Video, $ = Audio
 {
     Call 'QUEUE ADD'(dvMatrix,"itoa(nIn),'*',itoa(nOut),cLvl",5,0)
@@ -470,20 +454,6 @@ DATA_EVENT[dvMatrix]
     }
 }
 
-DATA_EVENT[dvScaler612]
-{
-    Online:
-    {
-	SEND_COMMAND data.device,"'SET BAUD 9600,8,N,1'"
-    }
-}
-DATA_EVENT[dvScaler614]
-{
-    Online:
-    {
-	SEND_COMMAND data.device,"'SET BAUD 9600,8,N,1'"
-    }
-}
 DATA_EVENT[dvProj612]
 {
     Online:
@@ -625,53 +595,6 @@ BUTTON_EVENT[dvTpBoth,nProjAdvance]
     }
 }
 
-button_event[dvTpCombos,nBtnDVDMisc]
-{
-    push:
-    {
-	STACK_VAR integer nDvdIrChan
-       switch(get_last(nBtnDVDMisc))
-	{
-	    case 1: //Up Arrow
-	    {	 
-		nDvdIrChan = 45
-	    }
-	    case 2: //Down Arrow
-	    {	 
-		nDvdIrChan = 46
-	    }
-	    case 3: //Left Arrow
-	    {	 
-		nDvdIrChan = 47
-	    }
-	    case 4: //Right Arrow
-	    {	 
-		nDvdIrChan = 48
-	    }
-	    case 5: //Enter
-	    {	 
-		nDvdIrChan = 49
-	    }
-	    case 6: //Menu
-	    {	 
-		nDvdIrChan = 44
-	    }
-	    case 7: //Main
-	    {	 
-		nDvdIrChan = 54
-	    }
-	    case 8:  //Display
-	    {	 
-		nDvdIrChan = 58
-	    } 
-	    case 9:  //Return
-	    {	 
-		nDvdIrChan = 54
-	    } 
-	}
-	Pulse[dvBothCombos[(get_last(dvTpCombos))],ndvdirchan]
-    }
-}
 
 (***********************************************************)
 (*            THE ACTUAL PROGRAM GOES BELOW                *)
@@ -731,20 +654,7 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 		{
 		    SWITCH (nCurrentSource[get_last(dvTpBoth)])
 		    {
-			CASE nDvd:
-			{
-			    Pulse[dvCombo614,114]	//Select the DVD Side of Combo Deck
-			    Call 'Scaler 614'(2,1)
-			    Call 'Matrix'(5,3,'!')
-			    Call 'Proj Control'(ProjLeft614,'RGB3')
-			}
-			Case nVCR:
-			{
-			    Pulse[dvCombo614,113]	//Select the VCR Side of Combo Deck
-			    Call 'Scaler 614'(1,1)
-			    Call 'Matrix'(5,3,'!')
-			    Call 'Proj Control'(ProjLeft614,'RGB3')
-			}
+			
 			Case nPC:
 			{
 			    Call 'Proj Control'(ProjLeft614,'RGB3')
@@ -763,22 +673,7 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 		{
 		    SWITCH (nCurrentSource[get_last(dvTpBoth)])
 		    {
-			CASE nDvd:
-			{
-			    Pulse[dvCombo614,114]	//Select the VCR Side of Combo Deck
-			    Call 'Scaler 614'(2,1)
-			    Call 'Matrix'(5,2,'&')
-			    Call 'Matrix'(5,3,'$')
-			    Call 'Proj Control'(ProjRight614,'RGB3')
-			}
-			Case nVCR:
-			{
-			    Pulse[dvCombo614,113]	//Select the VCR Side of Combo Deck
-			    Call 'Scaler 614'(1,1)
-			    Call 'Matrix'(5,2,'&')
-			    Call 'Matrix'(5,3,'$')
-			    Call 'Proj Control'(ProjRight614,'RGB3')
-			}
+			
 			Case nPC:
 			{
 			    Call 'Proj Control'(ProjRight614,'RGB3')
@@ -802,26 +697,7 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 		{
 		    SWITCH (nCurrentSource[get_last(dvTpBoth)])
 		    {
-			CASE nDvd:
-			{
-			    Call 'Proj Control'(ProjRight614,'RGB3')
-			    Call 'Proj Control'(ProjLeft614,'RGB3')
-			    Pulse[dvCombo614,114]	//Select the dvd Side of Combo Deck
-			    Call 'Scaler 614'(2,1)
-			    Call 'Matrix'(5,2,'&')
-			    Call 'Matrix'(5,3,'&')
-			    Call 'Matrix'(5,3,'$')
-			}
-			Case nVCR:
-			{
-			    Call 'Proj Control'(ProjRight614,'RGB3')
-			    Call 'Proj Control'(ProjLeft614,'RGB3')
-			    Pulse[dvCombo614,113]	//Select the VCR Side of Combo Deck
-			    Call 'Scaler 614'(1,1)
-			    Call 'Matrix'(5,2,'&')
-			    Call 'Matrix'(5,3,'&')
-			    Call 'Matrix'(5,3,'$')
-			}
+			
 			Case nPC:
 			{
 			    Call 'Proj Control'(ProjRight614,'RGB3')
@@ -842,42 +718,7 @@ BUTTON_EVENT[dvTpBoth,nSrcSelects]
     {
 	SWITCH(get_last(nSrcSelects))
 	{
-	    Case 1:	//DVD
-	    {
-		If (button.input.device.number = 10005)	//Room 612
-		{
-		    IF(PROJ_POWER1 = 0)
-		    {
-			CALL 'Proj Power'(ProjCenter612,'PON')
-		    }
-		    WAIT_UNTIL (RUN1 = 1)
-		    {
-			Call 'Proj Control'(ProjCenter612,'RGB3')
-			Pulse[dvCombo612,114]	//Select the DVD Side of Combo Deck
-			Call 'Scaler 612'(2,1)
-			Call 'Matrix'(6,1,'!')
-		    }
-		}
-		nCurrentSource[get_last(dvTpBoth)] = nDvd
-	    }
-	    Case 2:	//VCR
-	    {
-		If (button.input.device.number = 10005)
-		{
-		    IF(PROJ_POWER1 = 0)
-		    {
-			CALL 'Proj Power'(ProjCenter612,'PON')
-		    }
-		    WAIT_UNTIL (RUN1 = 1)
-		    {
-			Call 'Proj Control'(ProjCenter612,'RGB3')
-			Pulse[dvCombo612,113]	//Select the VCR Side of Combo Deck
-			Call 'Scaler 612'(1,1)
-			Call 'Matrix'(6,1,'!')
-		    }
-		    nCurrentSource[get_last(dvTpBoth)] = nVCR
-		}
-	    }
+	    
 	    Case 3:	//Laptop
 	    {
 		If (button.input.device.number = 10005)
@@ -1188,9 +1029,6 @@ If((time_to_hour(time) = 21)&&(time_to_minute(time) = 00)&&(nTimeBlock = 0))
     wait 620			//Need to wait until the minute is over.
 	nTimeBlock = 0	
 }
-
-SYSTEM_CALL [1]'VCR1'(dvCombo612,dvTp612Combo,1,2,3,4,5,6,7,0,0)
-SYSTEM_CALL [2]'VCR1'(dvCombo614,dvTp614Combo,1,2,3,4,5,6,7,0,0)
 
 [dvTp612,214] = (uAudiaVol[2].nVolRamp = AUDIA_VOL_UP)
 [dvTp612,215] = (uAudiaVol[2].nVolRamp = AUDIA_VOL_DOWN)
