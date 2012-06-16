@@ -14,8 +14,6 @@ dvMatrix  	= 5001:2:0	//Extron 450
 dvProj612   	= 5001:3:0	//Epson Powerlite G5750 
 dvProj614Rt   	= 5001:4:0	//Proxima C450 Right side as looking at Screen
 dvProj614Lt   	= 5001:5:0	//Proxima C450 Left side as looking at Screen
-dvScaler614 	= 5001:6:0	//Extron DVS304A
-dvScaler612 	= 5001:7:0	//Extron DVS304A
 dvRelay	  	= 5001:8:0	//Relay for Rack Power.
 dvTp614	  	= 10001:1:0   	//MVP-8400 in the room with 1 Projectors.
 dvTp612	  	= 10005:1:0   	//MVP-8400 in the room with 2 Projector.
@@ -45,8 +43,6 @@ integer ProjRight614 = 4
 integer ProjLeft614 = 5
 integer Proj614comb = 6
 
-integer nDvd = 1
-integer nVCR = 2
 integer nPC = 3
 integer nRight = 5
 integer nLeft = 6
@@ -55,19 +51,7 @@ integer CombineRooms = 41
 INTEGER TL1 = 1
 INTEGER TL2 = 2
 integer OffTime = 60	//Used to count down the time to turn the system off.
-INTEGER nBtnDVDMisc[] = 
-{
-    20,
-    21,
-    22,
-    23,
-    24,
-    25,
-    26,
-    27,
-    28,
-    29
-}
+
 
 integer nRgbPortBtn[]=		//For selecting the RGB floor jacks
 {
@@ -216,7 +200,7 @@ DEFINE_CALL 'Proj Power'(integer Proj_Num, char Proj_Control[10]) //Projector Co
 		{
 		    IF(PROJ_POWER1 = 0)
 		    {
-			SEND_STRING dvProj612,'(PWR1)'
+			SEND_STRING dvProj612,'PWR ON'
 			WAIT 25
 			{
 			    RUN1 = 1
@@ -227,7 +211,7 @@ DEFINE_CALL 'Proj Power'(integer Proj_Num, char Proj_Control[10]) //Projector Co
 		{
 		    IF(PROJ_POWER1 = 1)
 		    {
-			SEND_STRING dvProj612,'(PWR0)'
+			SEND_STRING dvProj612,'PWR OFF'
 			RUN1 = 0
 		    }
 		}
@@ -458,7 +442,7 @@ DATA_EVENT[dvProj612]
 {
     Online:
     {
-	SEND_COMMAND data.device,"'SET BAUD 19200,8,N,1'" //Baud Rate of the Proj
+	SEND_COMMAND data.device,"'SET BAUD 9600,8,N,1'" //Baud Rate of the Proj
 	PROJ_POWER1 = 0
     }
      STRING:
@@ -716,26 +700,20 @@ BUTTON_EVENT[dvTpBoth,nSrcSelects]
 {
     Push:
     {
-	SWITCH(get_last(nSrcSelects))
+	If (button.input.device.number = 10005)
 	{
-	    
-	    Case 3:	//Laptop
+	    IF(PROJ_POWER1 = 0)
 	    {
-		If (button.input.device.number = 10005)
-		{
-		    IF(PROJ_POWER1 = 0)
-		    {
-			CALL 'Proj Power'(ProjCenter612,'PON')
-		    }
-		    WAIT_UNTIL (RUN1 = 1)
-		    {
-			Call 'Proj Control'(ProjCenter612,'RGB3')
-			Call 'Matrix'(nPodiumLocation[1],1,'!')
-		    }
-		}
-		nCurrentSource[get_last(dvTpBoth)] = nPC
+	    CALL 'Proj Power'(ProjCenter612,'PON')
+	    }
+	    WAIT_UNTIL (RUN1 = 1)
+	    {
+		(*Call 'Proj Control'(ProjCenter612,'RGB3')*)
+		Call 'Matrix'(nPodiumLocation[1],3,'!')
 	    }
 	}
+	nCurrentSource[get_last(dvTpBoth)] = nPC
+
     }
 }
 BUTTON_EVENT[dvTpBoth,nBtnPwrOff]
