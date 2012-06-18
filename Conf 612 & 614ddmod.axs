@@ -17,8 +17,7 @@ dvProj614Lt   	= 5001:5:0	//Proxima C450 Left side as looking at Screen
 dvRelay	  	= 5001:8:0	//Relay for Rack Power.
 dvTp614	  	= 10001:1:0   	//MVP-8400 in the room with 1 Projectors.
 dvTp612	  	= 10005:1:0   	//MVP-8400 in the room with 2 Projector.
-dvTp614Combo 	= 10001:2:0   	//MVP-8400 port 2 to control Combo Deck
-dvTp612Combo 	= 10005:2:0   	//MVP-8400 port 2 to control Combo Deck
+
 
 //Dvtp1a = 10001:1:0
 (***********************************************************)
@@ -29,10 +28,7 @@ dev dvTpBoth[] =
 {
     dvTp612,dvTp614
 }
-dev dvTpCombos[] = 
-{
-    dvTp612Combo,dvTp614Combo
-}
+
 integer PowerRelay1 = 1
 integer PowerRelay2 = 2
 integer PowerRelay3 = 3
@@ -200,19 +196,19 @@ DEFINE_CALL 'Proj Power'(integer Proj_Num, char Proj_Control[10]) //Projector Co
 		{
 		    IF(PROJ_POWER1 = 0)
 		    {
-			SEND_STRING dvProj612,'PWR ON'
-			WAIT 25
+			SEND_STRING dvProj612,'pwr on'
+			(*WAIT 25
 			{
 			    RUN1 = 1
-			}
+			}*)
 		    }
 		}
 		ACTIVE(Proj_Control = 'POF'):
 		{
 		    IF(PROJ_POWER1 = 1)
 		    {
-			SEND_STRING dvProj612,'PWR OFF'
-			RUN1 = 0
+			SEND_STRING dvProj612,'pwr off'
+			(*RUN1 = 0*)
 		    }
 		}
 	    }
@@ -448,7 +444,7 @@ DATA_EVENT[dvProj612]
      STRING:
     {
              
-        LOCAL_VAR X
+       (* LOCAL_VAR X
         PROJ_BUFFER1 = DATA.TEXT
         X = LENGTH_STRING(PROJ_BUFFER1)
         IF(X > 2)
@@ -460,7 +456,7 @@ DATA_EVENT[dvProj612]
 	    }
             SET_LENGTH_STRING(PROJ_BUFFER1,0)
             PROJ_BUFFER1 = '' 
-	}
+	}*)
     }
 }
 DATA_EVENT[dvProj614Lt]
@@ -551,30 +547,7 @@ BUTTON_EVENT[dvTpBoth,nProjAdvance]
 	    {
 		Call 'Proj Control'(ProjLeft614,'POF')
 	    }
-	    Case 7:
-	    {
-		[dvTpBoth,105] = ![dvTpBoth,105]
-		IF([dvTpBoth,105])
-		    SEND_STRING dvProj612,'(BLK1)'
-		ELSE
-		    SEND_STRING dvProj612,'(BLK0)'
-	    }
-	    Case 8:
-	    {
-		[dvTpBoth,106] = ![dvTpBoth,106]
-		IF([dvTpBoth,106])
-		    SEND_STRING dvProj614Lt,'(BLK1)'
-		ELSE
-		    SEND_STRING dvProj614Lt,'(BLK0)'
-	    }
-	    Case 9:
-	    {
-		[dvTpBoth,107] = ![dvTpBoth,107]
-		IF([dvTpBoth,107])
-		    SEND_STRING dvProj614Rt,'(BLK1)'
-		ELSE
-		    SEND_STRING dvProj614Rt,'(BLK0)'
-	    }
+	    
 	}
     }
 }
@@ -700,19 +673,61 @@ BUTTON_EVENT[dvTpBoth,nSrcSelects]
 {
     Push:
     {
-	If (button.input.device.number = 10005)
-	{
-	    IF(PROJ_POWER1 = 0)
-	    {
-	    CALL 'Proj Power'(ProjCenter612,'PON')
-	    }
-	    WAIT_UNTIL (RUN1 = 1)
-	    {
-		(*Call 'Proj Control'(ProjCenter612,'RGB3')*)
-		Call 'Matrix'(nPodiumLocation[1],3,'!')
-	    }
-	}
-	nCurrentSource[get_last(dvTpBoth)] = nPC
+	SWITCH(get_last(nSrcSelects))
+        {
+            Case 1:     //DVD
+            {
+                If (button.input.device.number = 10005) //Room 612
+                {
+                    IF(PROJ_POWER1 = 0)
+                    {
+                        CALL 'Proj Power'(ProjCenter612,'PON')
+                    }
+                    WAIT_UNTIL (RUN1 = 1)
+                    {
+                        Call 'Proj Control'(ProjCenter612,'RGB3')
+                        
+                        
+                        Call 'Matrix'(6,1,'!')
+                    }
+                }
+                
+            }
+            Case 2:     //VCR
+            {
+                If (button.input.device.number = 10005)
+                {
+                    IF(PROJ_POWER1 = 0)
+                    {
+                        CALL 'Proj Power'(ProjCenter612,'PON')
+                    }
+                    WAIT_UNTIL (RUN1 = 1)
+                    {
+                        Call 'Proj Control'(ProjCenter612,'RGB3')
+                       
+                        
+                        Call 'Matrix'(6,1,'!')
+                    }
+                   
+                }
+            }
+            Case 3:     //Laptop
+            {
+                If (button.input.device.number = 10005)
+                {
+                    IF(PROJ_POWER1 = 0)
+                    {
+                        CALL 'Proj Power'(ProjCenter612,'PON')
+                    }
+                    WAIT_UNTIL (RUN1 = 1)
+                    {
+                        Call 'Proj Control'(ProjCenter612,'RGB3')
+                        Call 'Matrix'(nPodiumLocation[1],3,'!')
+                    }
+                }
+                nCurrentSource[get_last(dvTpBoth)] = nPC
+            }
+        }
 
     }
 }
@@ -784,10 +799,7 @@ BUTTON_EVENT[dvTp614,nRoomMode]
 		    RoomCombineMode = 1
 		}
 	    }
-	    Case 14:	
-	    {
-		
-	    }
+	    
 	}
     }
 }
@@ -885,7 +897,7 @@ BUTTON_EVENT[dvTp612,216]        // Vol Mute
   PUSH :
   { 
     STACK_VAR INTEGER nVolChn
-    nVolChn = 2
+    nVolChn = 29
     SWITCH(BUTTON.INPUT.CHANNEL)
     {
       CASE 214 :    // Vol Up
@@ -981,7 +993,7 @@ TIMELINE_EVENT[TL2] // capture all events for Timeline 2
 	case 1: 
 	    {
 		nCheckPwr[1] = 1
-		SEND_STRING dvProj612,"'(PWR?)'"
+		SEND_STRING dvProj612,"'pwr?'"
 	    } 
 	case 2: { } 
 	case 3:

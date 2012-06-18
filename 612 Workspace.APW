@@ -146,29 +146,25 @@
 <FilePathName>Include\Biamp_Audia.axi</FilePathName>
 <Comments></Comments>
 </File>
-<File CompileType="None" Type="Include"><Identifier>Matrix_Switcher</Identifier>
-<FilePathName>Include\Matrix_Switcher.axi</FilePathName>
-<Comments>Extron 450 Matrix Switcher</Comments>
-</File>
 <File CompileType="None" Type="Include"><Identifier>nAMX_QUEUE</Identifier>
 <FilePathName>Include\nAMX_QUEUE.axi</FilePathName>
 <Comments></Comments>
 </File>
-<File CompileType="None" Type="Other"><Identifier>U OF I 612 614_MRC_DL11031341-2-28</Identifier>
-<FilePathName>U OF I 612 614_MRC_DL11031341-2-28.nex</FilePathName>
-<Comments></Comments>
-</File>
-<File CompileType="None" Type="TP4"><Identifier>Univ of Illinois Conf 612 Rev2 MRC</Identifier>
-<FilePathName>Univ of Illinois Conf 612 Rev2 MRC.TP4</FilePathName>
+<File CompileType="None" Type="TP4"><Identifier>Room 612</Identifier>
+<FilePathName>Room 612.TP4</FilePathName>
 <Comments></Comments>
 <DeviceMap DevAddr="dvTp612"><DevName>dvTp612</DevName>
 </DeviceMap>
 </File>
-<File CompileType="None" Type="TP4"><Identifier>Univ of Illinois Conf 614 Rev 2 MRC</Identifier>
-<FilePathName>Univ of Illinois Conf 614 Rev 2 MRC.TP4</FilePathName>
+<File CompileType="None" Type="TP4"><Identifier>Room 614</Identifier>
+<FilePathName>Room 614.TP4</FilePathName>
 <Comments></Comments>
 <DeviceMap DevAddr="dvTp614"><DevName>dvTp614</DevName>
 </DeviceMap>
+</File>
+<File CompileType="None" Type="Other"><Identifier>U OF I 612 614_MRC_DL11031341-2-28</Identifier>
+<FilePathName>U OF I 612 614_MRC_DL11031341-2-28.nex</FilePathName>
+<Comments></Comments>
 </File>
 </System>
 </Project>
