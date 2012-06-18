@@ -194,22 +194,22 @@ DEFINE_CALL 'Proj Power'(integer Proj_Num, char Proj_Control[10]) //Projector Co
 	    {
 		ACTIVE(Proj_Control = 'PON'):
 		{
-		    IF(PROJ_POWER1 = 0)
-		    {
-			SEND_STRING dvProj612,'pwr on'
+		    //IF(PROJ_POWER1 = 0)
+		    //{
+			SEND_STRING dvProj612,'PWR ON'
 			(*WAIT 25
 			{
 			    RUN1 = 1
 			}*)
-		    }
+		   //}
 		}
 		ACTIVE(Proj_Control = 'POF'):
 		{
-		    IF(PROJ_POWER1 = 1)
-		    {
-			SEND_STRING dvProj612,'pwr off'
+		    //IF(PROJ_POWER1 = 1)
+		    //{
+			SEND_STRING dvProj612,'PWR OFF'
 			(*RUN1 = 0*)
-		    }
+		    //}
 		}
 	    }
 	}
@@ -444,7 +444,7 @@ DATA_EVENT[dvProj612]
      STRING:
     {
              
-       (* LOCAL_VAR X
+	LOCAL_VAR X
         PROJ_BUFFER1 = DATA.TEXT
         X = LENGTH_STRING(PROJ_BUFFER1)
         IF(X > 2)
@@ -456,7 +456,7 @@ DATA_EVENT[dvProj612]
 	    }
             SET_LENGTH_STRING(PROJ_BUFFER1,0)
             PROJ_BUFFER1 = '' 
-	}*)
+	}
     }
 }
 DATA_EVENT[dvProj614Lt]
@@ -525,11 +525,11 @@ BUTTON_EVENT[dvTpBoth,nProjAdvance]
 	{
 	    Case 1:
 	    {
-		Call 'Proj Control'(ProjCenter612,'PON')
+		Call 'Proj Power'(ProjCenter612,'PON')
 	    }
 	    Case 2:
 	    {
-		Call 'Proj Control'(ProjCenter612,'POF')
+		Call 'Proj Power'(ProjCenter612,'POF')
 	    }
 	    Case 3:
 	    {
