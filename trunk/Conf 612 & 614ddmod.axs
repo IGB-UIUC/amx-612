@@ -196,7 +196,7 @@ DEFINE_CALL 'Proj Power'(integer Proj_Num, char Proj_Control[10]) //Projector Co
 		{
 		    //IF(PROJ_POWER1 = 0)
 		    //{
-			SEND_STRING dvProj612,'PWR ON'
+			SEND_STRING dvProj612,"'PWR ON',$0D"
 			(*WAIT 25
 			{
 			    RUN1 = 1
@@ -207,7 +207,7 @@ DEFINE_CALL 'Proj Power'(integer Proj_Num, char Proj_Control[10]) //Projector Co
 		{
 		    //IF(PROJ_POWER1 = 1)
 		    //{
-			SEND_STRING dvProj612,'PWR OFF'
+			SEND_STRING dvProj612,"'PWR OFF',$0D"
 			(*RUN1 = 0*)
 		    //}
 		}
@@ -533,19 +533,19 @@ BUTTON_EVENT[dvTpBoth,nProjAdvance]
 	    }
 	    Case 3:
 	    {
-		Call 'Proj Control'(ProjRight614,'PON')
+		Call 'Proj Power'(ProjRight614,'PON')
 	    }
 	    Case 4:
 	    {
-		Call 'Proj Control'(ProjRight614,'POF')
+		Call 'Proj Power'(ProjRight614,'POF')
 	    }
 	    Case 5:
 	    {
-		Call 'Proj Control'(ProjLeft614,'PON')
+		Call 'Proj Power'(ProjLeft614,'PON')
 	    }
 	    Case 6:
 	    {
-		Call 'Proj Control'(ProjLeft614,'POF')
+		Call 'Proj Power'(ProjLeft614,'POF')
 	    }
 	    
 	}
@@ -614,8 +614,9 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			
 			Case nPC:
 			{
-			    Call 'Proj Control'(ProjLeft614,'RGB3')
-			    Call 'Matrix'(nPodiumLocation[2],3,'!')
+			    //Call 'Proj Control'(ProjLeft614,'RGB3')
+			    Call 'Matrix'(nPodiumLocation[2],2,'&')
+			    Call 'Matrix'(nPodiumLocation[2],1,'$')
 			}
 		    }
 		}
@@ -633,9 +634,9 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			
 			Case nPC:
 			{
-			    Call 'Proj Control'(ProjRight614,'RGB3')
-			    Call 'Matrix'(nPodiumLocation[2],2,'&')//VIDEO
-			    Call 'Matrix'(nPodiumLocation[2],3,'$')//AUDIO
+			    //Call 'Proj Control'(ProjRight614,'RGB3')
+			    Call 'Matrix'(nPodiumLocation[2],1,'&')//VIDEO
+			    Call 'Matrix'(nPodiumLocation[2],1,'$')//AUDIO
 			}
 		    }
 		}
@@ -657,11 +658,11 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			
 			Case nPC:
 			{
-			    Call 'Proj Control'(ProjRight614,'RGB3')
-			    Call 'Proj Control'(ProjLeft614,'RGB3')
+			    //Call 'Proj Control'(ProjRight614,'RGB3')
+			    //Call 'Proj Control'(ProjLeft614,'RGB3')
+			    Call 'Matrix'(nPodiumLocation[2],1,'&')//VIDEO
 			    Call 'Matrix'(nPodiumLocation[2],2,'&')//VIDEO
-			    Call 'Matrix'(nPodiumLocation[2],3,'&')//VIDEO
-			    Call 'Matrix'(nPodiumLocation[2],3,'$')//AUDIO
+			    Call 'Matrix'(nPodiumLocation[2],1,'$')//AUDIO
 			}
 		    }
 		}
@@ -993,18 +994,18 @@ TIMELINE_EVENT[TL2] // capture all events for Timeline 2
 	case 1: 
 	    {
 		nCheckPwr[1] = 1
-		SEND_STRING dvProj612,"'pwr?'"
+		//SEND_STRING dvProj612,"'PWR?'"
 	    } 
 	case 2: { } 
 	case 3:
 	    {
 		nCheckPwr[2] = 1
-		SEND_STRING dvProj614Lt,"'(PWR?)'"
+		//SEND_STRING dvProj614Lt,"'(PWR?)'"
 	    } 
 	case 4:
 	    {
 		nCheckPwr[3] = 1
-		SEND_STRING dvProj614Rt,"'(PWR?)'"
+		//SEND_STRING dvProj614Rt,"'(PWR?)'"
 	    } 
     }
 }
