@@ -386,6 +386,42 @@ DEFINE_CALL 'System Off'(Char nRoom[3])
     Send_string 0:1:0,"'Need to MUTE the AUDIO',13,10"
 }
 
+DEFINE_CALL 'AUDIO_MUTE'(integer audio_channel) {
+    IF(uAudiaVol[audio_channel].nMute)
+	{
+          AUDIA_SetVolumeFn (audio_channel, AUDIA_VOL_MUTE_OFF)
+	}
+        ELSE
+	{
+          AUDIA_SetVolumeFn (audio_channel, AUDIA_VOL_MUTE)
+	}
+
+
+}
+DEFINE_CALL 'AUDIO_UP'(integer audio_channel) {
+    IF(uAudiaVol[audio_channel].nMute)
+	{
+          AUDIA_SetVolumeFn (audio_channel, AUDIA_VOL_MUTE_OFF)
+	}
+        ELSE
+	{
+          AUDIA_SetVolumeFn (audio_channel, AUDIA_VOL_UP)
+	}
+
+}
+
+DEFINE_CALL 'AUDIO_DOWN'(integer audio_channel) {
+    IF(uAudiaVol[audio_channel].nMute)
+	{
+          AUDIA_SetVolumeFn (audio_channel, AUDIA_VOL_MUTE_OFF)
+	}
+        ELSE
+	{
+          AUDIA_SetVolumeFn (audio_channel, AUDIA_VOL_DOWN)
+	}
+
+}
+
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
@@ -412,16 +448,31 @@ DATA_EVENT[dvAudia1]
 	{
 	    (*-- Biamp Parms (Lvl,Dev,VolCmd,MuteCmd,Min,Max) ---------*)
 		(* add a channel for stereo pair mrc Z1 right and Left 614*)
-	    AUDIA_AssignVolumeParms (1, dvAUDIA1, 'SET 2 INPLVL 22 5 ', 'SET 2 INPMUTE 22 5 ', 0, 1120)
-	    AUDIA_AssignVolumeParms (5, dvAUDIA1, 'SET 2 INPLVL 22 6 ', 'SET 2 INPMUTE 22 6 ', 0, 1120)
+	    //AUDIA_AssignVolumeParms (1, dvAUDIA1, 'SET 2 INPLVL 22 5 ', 'SET 2 INPMUTE 22 5 ', 0, 1120)
+	    //AUDIA_AssignVolumeParms (5, dvAUDIA1, 'SET 2 INPLVL 22 6 ', 'SET 2 INPMUTE 22 6 ', 0, 1120)
 		(* add a channel for stereo pair mrc Z2 right and left 612*)
-	    AUDIA_AssignVolumeParms (2, dvAUDIA1, 'SET 2 INPLVL 22 9 ', 'SET 2 INPMUTE 22 9 ', 0, 1120)
-	    AUDIA_AssignVolumeParms (6, dvAUDIA1, 'SET 2 INPLVL 22 10 ', 'SET 2 INPMUTE 22 10 ', 0, 1120)
+	    //AUDIA_AssignVolumeParms (2, dvAUDIA1, 'SET 2 INPLVL 22 9 ', 'SET 2 INPMUTE 22 9 ', 0, 1120)
+	    //AUDIA_AssignVolumeParms (6, dvAUDIA1, 'SET 2 INPLVL 22 10 ', 'SET 2 INPMUTE 22 10 ', 0, 1120)
 		(*mic 612*)
-	    AUDIA_AssignVolumeParms (3, dvAUDIA1, 'SET 2 INPLVL 22 1 ', 'SET 2 INPMUTE 22 1 ', 0, 1120)
+	    //AUDIA_AssignVolumeParms (3, dvAUDIA1, 'SET 2 INPLVL 22 1 ', 'SET 2 INPMUTE 22 1 ', 0, 1120)
 		(*mic 614*)
-	    AUDIA_AssignVolumeParms (4, dvAUDIA1, 'SET 2 INPLVL 22 2 ', 'SET 2 INPMUTE 22 2 ', 0, 1120)
+	    //AUDIA_AssignVolumeParms (4, dvAUDIA1, 'SET 2 INPLVL 22 2 ', 'SET 2 INPMUTE 22 2 ', 0, 1120)
 	    
+	    //Room 614
+	    //Computer Volume
+	    AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', -300, 1120)
+	    //614 Mic
+	    AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', -300, 1120)
+
+	    //Room 612
+	    //Computer Volume
+	    AUDIA_AssignVolumeParms (17, dvAUDIA1, 'SET 2 FDRLVL 17 1 ', 'SET 2 FDRMUTE 17 1 ', -300, 1120)
+	    //Podium Mic
+	    AUDIA_AssignVolumeParms (30, dvAUDIA1, 'SET 2 FDRLVL 30 1 ', 'SET 2 FDRMUTE 30 1 ', -300, 1120)
+	    //612 Wireless Mic
+	    AUDIA_AssignVolumeParms (21, dvAUDIA1, 'SET 2 FDRLVL 21 1 ', 'SET 2 FDRMUTE 21 1 ', -300, 1120)
+	    //612 Mixer for master volume
+	    AUDIA_AssignVolumeParms (29, dvAUDIA1, 'SET 2 MMLVLOUT 29 1 ', 'SET 2 MMMUTEOUT 29 1 ', -300, 1120)
 	}
     }
 }
@@ -614,9 +665,9 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			
 			Case nPC:
 			{
-			    //Call 'Proj Control'(ProjLeft614,'RGB3')
-			    Call 'Matrix'(nPodiumLocation[2],2,'&')
-			    Call 'Matrix'(nPodiumLocation[2],1,'$')
+			    
+			    Call 'Matrix'(nPodiumLocation[2],2,'&') //VIDEO
+			    Call 'Matrix'(nPodiumLocation[2],1,'$') //AUDIO
 			}
 		    }
 		}
@@ -634,7 +685,7 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			
 			Case nPC:
 			{
-			    //Call 'Proj Control'(ProjRight614,'RGB3')
+			    
 			    Call 'Matrix'(nPodiumLocation[2],1,'&')//VIDEO
 			    Call 'Matrix'(nPodiumLocation[2],1,'$')//AUDIO
 			}
@@ -674,61 +725,22 @@ BUTTON_EVENT[dvTpBoth,nSrcSelects]
 {
     Push:
     {
-	SWITCH(get_last(nSrcSelects))
-        {
-            Case 1:     //DVD
-            {
-                If (button.input.device.number = 10005) //Room 612
-                {
-                    IF(PROJ_POWER1 = 0)
-                    {
-                        CALL 'Proj Power'(ProjCenter612,'PON')
-                    }
-                    WAIT_UNTIL (RUN1 = 1)
-                    {
-                        Call 'Proj Control'(ProjCenter612,'RGB3')
-                        
-                        
-                        Call 'Matrix'(6,1,'!')
-                    }
-                }
-                
-            }
-            Case 2:     //VCR
-            {
-                If (button.input.device.number = 10005)
-                {
-                    IF(PROJ_POWER1 = 0)
-                    {
-                        CALL 'Proj Power'(ProjCenter612,'PON')
-                    }
-                    WAIT_UNTIL (RUN1 = 1)
-                    {
-                        Call 'Proj Control'(ProjCenter612,'RGB3')
-                       
-                        
-                        Call 'Matrix'(6,1,'!')
-                    }
-                   
-                }
-            }
-            Case 3:     //Laptop
-            {
-                If (button.input.device.number = 10005)
-                {
-                    IF(PROJ_POWER1 = 0)
-                    {
-                        CALL 'Proj Power'(ProjCenter612,'PON')
-                    }
-                    WAIT_UNTIL (RUN1 = 1)
-                    {
-                        Call 'Proj Control'(ProjCenter612,'RGB3')
-                        Call 'Matrix'(nPodiumLocation[1],3,'!')
-                    }
-                }
-                nCurrentSource[get_last(dvTpBoth)] = nPC
-            }
-        }
+
+	If (button.input.device.number = 10005)
+	{
+	    IF(PROJ_POWER1 = 0)
+	    {
+		CALL 'Proj Power'(ProjCenter612,'PON')
+	    }
+	    //WAIT_UNTIL (RUN1 = 1)
+	    //{
+		
+		Call 'Matrix'(nPodiumLocation[1],3,'!')
+	    //}
+	}
+	nCurrentSource[get_last(dvTpBoth)] = nPC
+           
+        
 
     }
 }
@@ -891,21 +903,42 @@ BUTTON_EVENT[dvTp614,206]        // Vol Mute
 }
 
 
-BUTTON_EVENT[dvTp612,214]        // Vol Up
-BUTTON_EVENT[dvTp612,215]        // Vol Down
-BUTTON_EVENT[dvTp612,216]        // Vol Mute
-{
-  PUSH :
-  { 
-    STACK_VAR INTEGER nVolChn
-    nVolChn = 29
-    SWITCH(BUTTON.INPUT.CHANNEL)
-    {
-      CASE 214 :    // Vol Up
-      {
-        IF(uAudiaVol[nVolChn].nMute)
-	{
-          AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_MUTE_OFF)
+BUTTON_EVENT[dvTp612,214] { 	//612 Vol Up
+     PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 29
+	Call 'AUDIO_UP'(audio_channel)
+    } 
+
+
+}     
+BUTTON_EVENT[dvTp612,215] {	//612 Vol Down
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 29
+	Call 'AUDIO_DOWN'(audio_channel)
+    }
+}     
+BUTTON_EVENT[dvTp612,216] {     // 612 Vol Mute
+PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 21
+	Call 'AUDIO_MUTE'(audio_channel)
+    }
+}
+
+/*{
+  //PUSH :
+  //{ 
+    //STACK_VAR INTEGER nVolChn
+    //nVolChn = 29
+    //SWITCH(BUTTON.INPUT.CHANNEL)
+    //{
+      //CASE 214 :    // Vol Up
+      //{
+        //IF(uAudiaVol[nVolChn].nMute)
+	//{
+          //AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_MUTE_OFF)
 	}
         ELSE
 	{
@@ -946,7 +979,77 @@ BUTTON_EVENT[dvTp612,216]        // Vol Mute
 	AUDIA_MatchVolumeLvl (6,2)      // Example: If this was a stereo pair
     }
 }
+*/
+BUTTON_EVENT[dvTp612,217] {	 // Mute Wireless Mic
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 29
+	Call 'AUDIO_MUTE'(audio_channel)
+    }
+}
+BUTTON_EVENT[dvTp612,218] {	//Mute Podium Mic
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 30
+	Call 'AUDIO_MUTE'(audio_channel)
+    }
+}
+BUTTON_EVENT[dvTp612,219] {	//Mute Computer Vol
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 17
+	Call 'AUDIO_MUTE'(audio_channel)
+    }
+}
+BUTTON_EVENT[dvTp612,220] {	//Decrease Vol Wirless Mic
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 21
+	Call 'AUDIO_DOWN'(audio_channel)
+    }
 
+}
+BUTTON_EVENT[dvTp612,221] {	//Decrease Vol Podium Mic
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 30
+	Call 'AUDIO_DOWN'(audio_channel)
+    }
+
+}
+BUTTON_EVENT[dvTp612,222] {	//Decrease Vol Computer
+
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 17
+	Call 'AUDIO_DOWN'(audio_channel)
+    }
+
+}
+BUTTON_EVENT[dvTp612,223] {	//Increase Vol Wirless Mic
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 21
+	Call 'AUDIO_UP'(audio_channel)
+    }
+
+}
+BUTTON_EVENT[dvTp612,224] {	//Increase Vol Podium Mic
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 30
+	Call 'AUDIO_UP'(audio_channel)
+    }
+
+}
+BUTTON_EVENT[dvTp612,225] {	//Increase Vol Computer
+    PUSH : {
+	STACK_VAR INTEGER audio_channel
+	audio_channel = 17
+	Call 'AUDIO_UP'(audio_channel)
+    }
+
+}
 
 
 
