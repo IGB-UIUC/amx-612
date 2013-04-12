@@ -130,7 +130,11 @@
 <UserName></UserName>
 <Password></Password>
 <Comments></Comments>
-<File CompileType="Netlinx" Type="MasterSrc"><Identifier>Conf 612 &amp; 614ddmod</Identifier>
+<File CompileType="None" Type="Other"><Identifier>audio</Identifier>
+<FilePathName>audio.nex</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="Netlinx" Type="MasterSrc"><Identifier>Room 612/614</Identifier>
 <FilePathName>Conf 612 &amp; 614ddmod.axs</FilePathName>
 <Comments></Comments>
 </File>
@@ -161,10 +165,6 @@
 <Comments></Comments>
 <DeviceMap DevAddr="dvTp614"><DevName>dvTp614</DevName>
 </DeviceMap>
-</File>
-<File CompileType="None" Type="Other"><Identifier>U OF I 612 614_MRC_DL11031341-2-28</Identifier>
-<FilePathName>U OF I 612 614_MRC_DL11031341-2-28.nex</FilePathName>
-<Comments></Comments>
 </File>
 </System>
 </Project>
