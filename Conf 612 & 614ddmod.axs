@@ -460,19 +460,35 @@ DATA_EVENT[dvAudia1]
 	    
 	    //Room 614
 	    //Computer Volume
-	    AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', -300, 1120)
+	    //AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', -300, 1120)
 	    //614 Mic
-	    AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', -300, 1120)
+	    //AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', -300, 1120)
 
 	    //Room 612
 	    //Computer Volume
-	    AUDIA_AssignVolumeParms (17, dvAUDIA1, 'SET 2 FDRLVL 17 1 ', 'SET 2 FDRMUTE 17 1 ', -300, 1120)
+	    //AUDIA_AssignVolumeParms (17, dvAUDIA1, 'SET 2 FDRLVL 17 1 ', 'SET 2 FDRMUTE 17 1 ', -300, 1120)
 	    //Podium Mic
-	    AUDIA_AssignVolumeParms (30, dvAUDIA1, 'SET 2 FDRLVL 30 1 ', 'SET 2 FDRMUTE 30 1 ', -300, 1120)
+	    //AUDIA_AssignVolumeParms (30, dvAUDIA1, 'SET 2 FDRLVL 30 1 ', 'SET 2 FDRMUTE 30 1 ', -300, 1120)
 	    //612 Wireless Mic
-	    AUDIA_AssignVolumeParms (21, dvAUDIA1, 'SET 2 FDRLVL 21 1 ', 'SET 2 FDRMUTE 21 1 ', -300, 1120)
+	    //AUDIA_AssignVolumeParms (21, dvAUDIA1, 'SET 2 FDRLVL 21 1 ', 'SET 2 FDRMUTE 21 1 ', -300, 1120)
 	    //612 Mixer for master volume
-	    AUDIA_AssignVolumeParms (29, dvAUDIA1, 'SET 2 MMLVLOUT 29 1 ', 'SET 2 MMMUTEOUT 29 1 ', -300, 1120)
+	    //AUDIA_AssignVolumeParms (29, dvAUDIA1, 'SET 2 MMLVLOUT 29 1 ', 'SET 2 MMMUTEOUT 29 1 ', -300, 1120)
+	    
+	    //Room 614
+	    //Computer Volume
+	    AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', -18, 12)
+	    //614 Mic
+	    AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', -18, 12)
+
+	    //Room 612
+	    //Computer Volume
+	    AUDIA_AssignVolumeParms (17, dvAUDIA1, 'SET 2 FDRLVL 17 1 ', 'SET 2 FDRMUTE 17 1 ', -18, 12)
+	    //Podium Mic
+	    AUDIA_AssignVolumeParms (30, dvAUDIA1, 'SET 2 FDRLVL 30 1 ', 'SET 2 FDRMUTE 30 1 ', -18, 12)
+	    //612 Wireless Mic
+	    AUDIA_AssignVolumeParms (21, dvAUDIA1, 'SET 2 FDRLVL 21 1 ', 'SET 2 FDRMUTE 21 1 ', -18, 12)
+	    //612 Mixer for master volume
+	    AUDIA_AssignVolumeParms (32, dvAUDIA1, 'SET 2 FDRLVL 32 1 ', 'SET 2 FDRMUTE 32 1 ', -18, 12)
 	}
     }
 }
@@ -577,6 +593,8 @@ BUTTON_EVENT[dvTpBoth,nProjAdvance]
 	    Case 1:
 	    {
 		Call 'Proj Power'(ProjCenter612,'PON')
+		
+		
 	    }
 	    Case 2:
 	    {
@@ -903,10 +921,10 @@ BUTTON_EVENT[dvTp614,206]        // Vol Mute
 }
 
 
-BUTTON_EVENT[dvTp612,214] { 	//612 Vol Up
+/*BUTTON_EVENT[dvTp612,214] { 	//612 Vol Up
      PUSH : {
 	STACK_VAR INTEGER audio_channel
-	audio_channel = 29
+	audio_channel = 32
 	Call 'AUDIO_UP'(audio_channel)
     } 
 
@@ -915,30 +933,33 @@ BUTTON_EVENT[dvTp612,214] { 	//612 Vol Up
 BUTTON_EVENT[dvTp612,215] {	//612 Vol Down
     PUSH : {
 	STACK_VAR INTEGER audio_channel
-	audio_channel = 29
+	audio_channel = 32
 	Call 'AUDIO_DOWN'(audio_channel)
     }
 }     
 BUTTON_EVENT[dvTp612,216] {     // 612 Vol Mute
 PUSH : {
 	STACK_VAR INTEGER audio_channel
-	audio_channel = 21
+	audio_channel = 32
 	Call 'AUDIO_MUTE'(audio_channel)
     }
-}
+}*/
 
-/*{
-  //PUSH :
-  //{ 
-    //STACK_VAR INTEGER nVolChn
-    //nVolChn = 29
-    //SWITCH(BUTTON.INPUT.CHANNEL)
-    //{
-      //CASE 214 :    // Vol Up
-      //{
-        //IF(uAudiaVol[nVolChn].nMute)
-	//{
-          //AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_MUTE_OFF)
+BUTTON_EVENT[dvTp612,214]        // Vol Up
+BUTTON_EVENT[dvTp612,215]        // Vol Down
+BUTTON_EVENT[dvTp612,216]        // Vol Mute
+{
+  PUSH :
+  { 
+    STACK_VAR INTEGER nVolChn
+    nVolChn = 32
+    SWITCH(BUTTON.INPUT.CHANNEL)
+    {
+      CASE 214 :    // Vol Up
+      {
+        IF(uAudiaVol[nVolChn].nMute)
+	{
+          AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_MUTE_OFF)
 	}
         ELSE
 	{
@@ -979,11 +1000,12 @@ PUSH : {
 	AUDIA_MatchVolumeLvl (6,2)      // Example: If this was a stereo pair
     }
 }
-*/
+
 BUTTON_EVENT[dvTp612,217] {	 // Mute Wireless Mic
     PUSH : {
 	STACK_VAR INTEGER audio_channel
-	audio_channel = 29
+	//audio_channel = 29
+	audio_channel = 21
 	Call 'AUDIO_MUTE'(audio_channel)
     }
 }
