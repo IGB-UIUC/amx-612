@@ -79,8 +79,6 @@ integer nBtnPodiumLoc[]=
 }
 INTEGER nSrcSelects[] = 
 {
-    91,	//DVD
-    92,	//VCR
     93	//Laptop
 }
 integer nProjAdvance[] = 
@@ -361,8 +359,6 @@ DEFINE_CALL 'Proj Control'(integer Proj_Num, char Proj_Control[10]) //Projector 
 DEFINE_CALL 'Matrix'(integer nIn,integer nOut,Char Clvl)	//! = A&V, & = Video, $ = Audio
 {
     Call 'QUEUE ADD'(dvMatrix,"itoa(nIn),'*',itoa(nOut),cLvl",5,0)
-    //Call 'QUEUE ADD'(dvMatrix,"itoa(nIn),'*',itoa(nOut),'!'",5,0)
-    //send_string dvMatrix,"itoa(nIn),'*',itoa(nOut),'!'"	//Audio and Video
     SEND_STRING 0:1:0,"'dvMatrix IN ',itoa(nIn),' to OUT ',itoa(nOut),13,10"
 }
 DEFINE_CALL 'System Off'(Char nRoom[3])
@@ -422,10 +418,20 @@ DEFINE_CALL 'AUDIO_DOWN'(integer audio_channel) {
 
 }
 
+DEFINE_CALL 'AUDIO_START' {
+	    send_string dvAudia1,"'SET 2 INPMUTE 22 9 0',10"
+	    send_string dvAudia1,"'SET 2 INPMUTE 22 10 0',10"
+	    
+	    send_string dvAudia1,"'SET 2 INPMUTE 22 5 0',10"
+	    send_string dvAudia1,"'SET 2 INPMUTE 22 6 0',10"
+
+
+
+}
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
-//SEND_STRING dvAudia1,"'SET 2 RTRMUTEXP 13 1 3 0',10" //SETS ROUTER INSTANCE 13 INPUT 1 TO OUTPUT 2 
+
 
 DEFINE_START
 PowerState[1] = 0
@@ -446,41 +452,17 @@ DATA_EVENT[dvAudia1]
 	SEND_COMMAND dvAudia1,"'SET BAUD 38400,8,N,1'"
 	Wait 10
 	{
-	    (*-- Biamp Parms (Lvl,Dev,VolCmd,MuteCmd,Min,Max) ---------*)
-		(* add a channel for stereo pair mrc Z1 right and Left 614*)
-	    //AUDIA_AssignVolumeParms (1, dvAUDIA1, 'SET 2 INPLVL 22 5 ', 'SET 2 INPMUTE 22 5 ', 0, 1120)
-	    //AUDIA_AssignVolumeParms (5, dvAUDIA1, 'SET 2 INPLVL 22 6 ', 'SET 2 INPMUTE 22 6 ', 0, 1120)
-		(* add a channel for stereo pair mrc Z2 right and left 612*)
-	    //AUDIA_AssignVolumeParms (2, dvAUDIA1, 'SET 2 INPLVL 22 9 ', 'SET 2 INPMUTE 22 9 ', 0, 1120)
-	    //AUDIA_AssignVolumeParms (6, dvAUDIA1, 'SET 2 INPLVL 22 10 ', 'SET 2 INPMUTE 22 10 ', 0, 1120)
-		(*mic 612*)
-	    //AUDIA_AssignVolumeParms (3, dvAUDIA1, 'SET 2 INPLVL 22 1 ', 'SET 2 INPMUTE 22 1 ', 0, 1120)
-		(*mic 614*)
-	    //AUDIA_AssignVolumeParms (4, dvAUDIA1, 'SET 2 INPLVL 22 2 ', 'SET 2 INPMUTE 22 2 ', 0, 1120)
-	    
-	    //Room 614
-	    //Computer Volume
-	    //AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', -300, 1120)
-	    //614 Mic
-	    //AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', -300, 1120)
-
-	    //Room 612
-	    //Computer Volume
-	    //AUDIA_AssignVolumeParms (17, dvAUDIA1, 'SET 2 FDRLVL 17 1 ', 'SET 2 FDRMUTE 17 1 ', -300, 1120)
-	    //Podium Mic
-	    //AUDIA_AssignVolumeParms (30, dvAUDIA1, 'SET 2 FDRLVL 30 1 ', 'SET 2 FDRMUTE 30 1 ', -300, 1120)
-	    //612 Wireless Mic
-	    //AUDIA_AssignVolumeParms (21, dvAUDIA1, 'SET 2 FDRLVL 21 1 ', 'SET 2 FDRMUTE 21 1 ', -300, 1120)
-	    //612 Mixer for master volume
-	    //AUDIA_AssignVolumeParms (29, dvAUDIA1, 'SET 2 MMLVLOUT 29 1 ', 'SET 2 MMMUTEOUT 29 1 ', -300, 1120)
-	    
-	    //Room 614
-	    //Computer Volume
+	    	    //Computer Volume
 	    AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', -18, 12)
 	    //614 Mic
 	    AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', -18, 12)
 
-	    //Room 612
+	    //////////////////////Room 612//////////////////////
+	    
+	    //Unmutes Computer audio on input matrix
+	    //AUDIA_AssignVolumeParms (42, dvAUDIA1, 'SET 2 INPLVL 22 5 ', 'SET 2 INPMUTE 22 5 ', -18, 12 )
+            //AUDIA_AssignVolumeParms (43, dvAUDIA1, 'SET 2 INPLVL 22 6 ', 'SET 2 INPMUTE 22 6 ', -18, 12 )
+
 	    //Computer Volume
 	    AUDIA_AssignVolumeParms (17, dvAUDIA1, 'SET 2 FDRLVL 17 1 ', 'SET 2 FDRMUTE 17 1 ', -18, 12)
 	    //Podium Mic
@@ -628,40 +610,40 @@ BUTTON_EVENT[dvTpBoth,nProjAdvance]
 BUTTON_EVENT[dvTpBoth,nBtnPodiumLoc]
 {
     Push:
-    {	
-	send_string 0:1:0,"'tp is ',itoa(get_last(dvTpBoth)),13,10"
-	//send_string 0:1:0,"'btn is ',itoa(nBtnPodiumLoc),13,10"
-	SWITCH(get_last(dvTpBoth))
-	{
-	    Case 1:	//612
-	    {
-		Switch (button.input.channel)
-		{
-		    Case nRight:
-		    {
-			nPodiumLocation[(get_last(dvTpBoth))] = 3	//3 is the sw input #
-		    }
-		    Case nLeft:
-		    {
-			nPodiumLocation[(get_last(dvTpBoth))] = 4	//4 is the sw input #
-		    }
-		}    
-	    }
-	    Case 2:	//614
-	    {
-		Switch (button.input.channel)
-		{
-		    Case nRight:
-		    {
-			nPodiumLocation[(get_last(dvTpBoth))] = 1	//1 is the sw input #
-		    }
-		    Case nLeft:
-		    {
-			nPodiumLocation[(get_last(dvTpBoth))] = 2	//2 is the sw input #
-		    }
-		}
-	    }
-	}
+    {   
+        send_string 0:1:0,"'tp is ',itoa(get_last(dvTpBoth)),13,10"
+        //send_string 0:1:0,"'btn is ',itoa(nBtnPodiumLoc),13,10"
+        SWITCH(get_last(dvTpBoth))
+        {
+            Case 1:     //612
+            {
+                Switch (button.input.channel)
+                {
+                    Case nRight:
+                    {
+                        nPodiumLocation[(get_last(dvTpBoth))] = 3       //3 is the sw input #
+                    }
+                    Case nLeft:
+                    {
+                        nPodiumLocation[(get_last(dvTpBoth))] = 4       //4 is the sw input #
+                    }
+                }    
+            }
+            Case 2:     //614
+            {
+                Switch (button.input.channel)
+                {
+                    Case nRight:
+                    {
+                        nPodiumLocation[(get_last(dvTpBoth))] = 1       //1 is the sw input #
+                    }
+                    Case nLeft:
+                    {
+                        nPodiumLocation[(get_last(dvTpBoth))] = 2       //2 is the sw input #
+                    }
+                }
+            }
+        }
     }
 }
 BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
@@ -727,8 +709,7 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			
 			Case nPC:
 			{
-			    //Call 'Proj Control'(ProjRight614,'RGB3')
-			    //Call 'Proj Control'(ProjLeft614,'RGB3')
+
 			    Call 'Matrix'(nPodiumLocation[2],1,'&')//VIDEO
 			    Call 'Matrix'(nPodiumLocation[2],2,'&')//VIDEO
 			    Call 'Matrix'(nPodiumLocation[2],1,'$')//AUDIO
@@ -744,19 +725,18 @@ BUTTON_EVENT[dvTpBoth,nSrcSelects]
     Push:
     {
 
-	If (button.input.device.number = 10005)
-	{
-	    IF(PROJ_POWER1 = 0)
-	    {
-		CALL 'Proj Power'(ProjCenter612,'PON')
-	    }
-	    //WAIT_UNTIL (RUN1 = 1)
-	    //{
-		
-		Call 'Matrix'(nPodiumLocation[1],3,'!')
-	    //}
-	}
-	nCurrentSource[get_last(dvTpBoth)] = nPC
+        If (button.input.device.number = 10005)
+        {
+            IF(PROJ_POWER1 = 0)
+            {
+                CALL 'Proj Power'(ProjCenter612,'PON')
+            }
+	    Call 'Matrix'(nPodiumLocation[1],3,'!')
+	    Call 'Matrix'(nPodiumLocation[1],6,'!')
+	    Call 'Matrix'(nPodiumLocation[1],8,'!')
+           
+        }
+        nCurrentSource[get_last(dvTpBoth)] = nPC
            
         
 
@@ -788,16 +768,18 @@ BUTTON_EVENT[dvTpBoth,8]	//This is on the Splash page. Basically a big transluce
 	    Case 1:
 	    {
 		Call 'Power Relay'(1,1)
+		Call 'AUDIO_START'
 	    }
 	    Case 2:
 	    {
 		Call 'Power Relay'(1,2)
+		Call 'AUDIO_START'
 	    }
 	}
     }
 }
 
-BUTTON_EVENT[dvTp614,nRoomMode]
+BUTTON_EVENT[dvTp612,nRoomMode]
 {
     Push:
     {
@@ -806,29 +788,29 @@ BUTTON_EVENT[dvTp614,nRoomMode]
 	    Case 12:	//Normal
 	    {
 		RoomCombineMode = 0
-		SEND_COMMAND dvTp612,"'PPOF-Room in use'"
-		send_string dvAudia1,"'SET 2 RTRMUTEXP 14 1 2 1',10"
-		send_string dvAudia1,"'SET 2 RTRMUTEXP 14 1 3 0',10"
-		send_string dvAudia1,"'SET 2 RTRMUTEXP 12 1 3 1',10"
-		send_string dvAudia1,"'SET 2 RTRMUTEXP 15 1 2 1',10"
-		send_string dvAudia1,"'SET 2 RTRMUTEXP 16 1 3 1',10"
+		//SEND_COMMAND dvTp612,"'PPOF-Room in use'"
+		//Mute All First
+		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 1 0',10"
+		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 2 0',10"
+		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 1 0',10"
+		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 2 0',10"
+		
+		//Enable audio routing to individual rooms
+		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 2 1',10"
+		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 1 1',10"
 	    }
 	    Case 13:	//Expanded or Combined
 	    {
-		If(PowerState[1])	//Other room is on.
-		{
-		    SEND_COMMAND dvTp614,"'PPON-Room in use'"
-		}
-		Else
-		{
-		    SEND_COMMAND dvTp612,"'PPON-Room in use'"
-		    send_string dvAudia1,"'SET 2 RTRMUTEXP 14 1 2 1',10"
-		    send_string dvAudia1,"'SET 2 RTRMUTEXP 14 1 3 1',10"
-		    send_string dvAudia1,"'SET 2 RTRMUTEXP 12 1 3 0',10"
-		    send_string dvAudia1,"'SET 2 RTRMUTEXP 15 1 2 0',10"
-		    send_string dvAudia1,"'SET 2 RTRMUTEXP 16 1 3 0',10"
+		    //Mute All First
+		    send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 1 0',10"
+		    send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 2 0',10"
+		    send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 1 0',10"
+		    send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 2 0',10"
+		    //Enable routing of audtio to entire room
+		    send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 1 1',10"
+		    send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 2 1',10"
 		    RoomCombineMode = 1
-		}
+		
 	    }
 	    
 	}
@@ -840,11 +822,8 @@ BUTTON_EVENT[dvTp614,CombineRooms]// BTN41 //YES - Combine the two rooms
     {
 	RoomCombineMode = 1
 	SEND_COMMAND dvTp612,"'PPON-Room in use'"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 14 1 2 1',10"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 14 1 3 1',10"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 12 1 3 0',10"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 15 1 2 0',10"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 16 1 3 0',10"
+	send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 2 1',10"
+	send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 1 1',10"
     }
 }
 BUTTON_EVENT[dvTp612,43]	//612 wants to override the Expanded mode
@@ -854,11 +833,7 @@ BUTTON_EVENT[dvTp612,43]	//612 wants to override the Expanded mode
 	RoomCombineMode = 0
 	SEND_COMMAND dvTp614,"'PPON-Room combine override'"
 	SEND_COMMAND dvTp612,"'PPOF-Room in use'"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 14 1 2 1',10"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 14 1 3 0',10"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 12 1 3 1',10"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 15 1 2 1',10"
-	send_string dvAudia1,"'SET 2 RTRMUTEXP 16 1 3 1',10"
+
     }
 }
 
@@ -921,83 +896,35 @@ BUTTON_EVENT[dvTp614,206]        // Vol Mute
 }
 
 
-/*BUTTON_EVENT[dvTp612,214] { 	//612 Vol Up
-     PUSH : {
-	STACK_VAR INTEGER audio_channel
+BUTTON_EVENT[dvTp612,214]        // Vol Up
+{
+    PUSH :
+    { 
+	STACK_VAR INTEGER audio_channel 
 	audio_channel = 32
 	Call 'AUDIO_UP'(audio_channel)
-    } 
-
-
-}     
-BUTTON_EVENT[dvTp612,215] {	//612 Vol Down
-    PUSH : {
-	STACK_VAR INTEGER audio_channel
-	audio_channel = 32
-	Call 'AUDIO_DOWN'(audio_channel)
     }
-}     
-BUTTON_EVENT[dvTp612,216] {     // 612 Vol Mute
-PUSH : {
-	STACK_VAR INTEGER audio_channel
-	audio_channel = 32
-	Call 'AUDIO_MUTE'(audio_channel)
-    }
-}*/
-
-BUTTON_EVENT[dvTp612,214]        // Vol Up
+}
 BUTTON_EVENT[dvTp612,215]        // Vol Down
+{
+    PUSH :
+    { 
+	STACK_VAR INTEGER audio_channel 
+	audio_channel = 32
+   
+	Call 'AUDIO_DOWN'(audio_channel)
+     
+    }
+}
+
 BUTTON_EVENT[dvTp612,216]        // Vol Mute
 {
-  PUSH :
-  { 
-    STACK_VAR INTEGER nVolChn
-    nVolChn = 32
-    SWITCH(BUTTON.INPUT.CHANNEL)
-    {
-      CASE 214 :    // Vol Up
-      {
-        IF(uAudiaVol[nVolChn].nMute)
-	{
-          AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_MUTE_OFF)
-	}
-        ELSE
-	{
-          AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_UP)
-	}
-      }
-      CASE 215 :    // Vol Down
-      {
-        IF(uAudiaVol[nVolChn].nMute)
-	{
-          AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_MUTE_OFF)
-	}
-        ELSE
-	{
-          AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_DOWN)
-	}
-      }
-      CASE 216 :    // Vol Mute
-      {
-        IF(uAudiaVol[nVolChn].nMute)
-	{
-          AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_MUTE_OFF)
-	}
-        ELSE
-	{
-          AUDIA_SetVolumeFn (nVolChn, AUDIA_VOL_MUTE)
-	}
-      }
-    }
-	AUDIA_MatchVolumeLvl (6,2)      // Example: If this was a stereo pair
-    }
-    RELEASE :
-    {
-	AUDIA_SetVolumeFn (2, AUDIA_VOL_STOP)
-    }
-    HOLD[3,REPEAT] :
-    {
-	AUDIA_MatchVolumeLvl (6,2)      // Example: If this was a stereo pair
+    PUSH :
+    { 
+	STACK_VAR INTEGER audio_channel 
+	audio_channel = 32
+	CALL 'AUDIO_MUTE'(audio_channel)
+
     }
 }
 
@@ -1152,6 +1079,8 @@ If((time_to_hour(time) = 21)&&(time_to_minute(time) = 00)&&(nTimeBlock = 0))
 [dvTp614,204] = (uAudiaVol[1].nVolRamp = AUDIA_VOL_UP)
 [dvTp614,205] = (uAudiaVol[1].nVolRamp = AUDIA_VOL_DOWN)
 [dvTp614,206] = (uAudiaVol[1].nMute)
+
+//Sets visual Audio level graph on touch screen
 SEND_LEVEL dvTp614,1,AUDIA_GetBgLvl(1)
 SEND_LEVEL dvTp612,2,AUDIA_GetBgLvl(2)
  
