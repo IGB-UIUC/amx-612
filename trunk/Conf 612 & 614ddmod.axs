@@ -732,8 +732,10 @@ BUTTON_EVENT[dvTpBoth,nSrcSelects]
                 CALL 'Proj Power'(ProjCenter612,'PON')
             }
 	    Call 'Matrix'(nPodiumLocation[1],3,'!')
-	    Call 'Matrix'(nPodiumLocation[1],6,'!')
-	    Call 'Matrix'(nPodiumLocation[1],8,'!')
+	    Call 'Matrix'(nPodiumLocation[1],6,'&')
+	     Call 'Matrix'(nPodiumLocation[1],8,'&')
+	    Call 'Matrix'(5,6,'$')
+	    Call 'Matrix'(5,8,'$')
            
         }
         nCurrentSource[get_last(dvTpBoth)] = nPC
@@ -796,8 +798,8 @@ BUTTON_EVENT[dvTp612,nRoomMode]
 		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 2 0',10"
 		
 		//Enable audio routing to individual rooms
-		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 2 1',10"
-		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 1 1',10"
+		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 1 1',10"
+		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 2 2 1',10"
 	    }
 	    Case 13:	//Expanded or Combined
 	    {
