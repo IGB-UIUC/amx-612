@@ -149,7 +149,7 @@ CONSTANT INTEGER AUDIA_MAX_DEV   = 5  // Keep track of this many Biamp Audia 232
 #END_IF
 
 #IF_NOT_DEFINED dvAudiaList
-CONSTANT DEV dvAudiaList[] = { dvAUDIA1 }
+CONSTANT DEV dvAudiaList[] = { dvAudia1 }
 #END_IF
 
 

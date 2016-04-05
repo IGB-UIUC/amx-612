@@ -14,7 +14,7 @@ dvMatrix  	= 5001:2:0	//Extron 450
 dvProj612   	= 5001:3:0	//Epson Powerlite G5750 
 dvProj614Rt   	= 5001:4:0	//Proxima C450 Right side as looking at Screen
 dvProj614Lt   	= 5001:5:0	//Proxima C450 Left side as looking at Screen
-dvRelay	  	= 5001:8:0	//Relay for Rack Power.
+dvRelay	  	= 5001:21:0	//Relay for Rack Power.
 dvTp614	  	= 10001:1:0   	//MVP-8400 in the room with 1 Projectors.
 dvTp612	  	= 10005:1:0   	//MVP-8400 in the room with 2 Projector.
 
@@ -403,7 +403,6 @@ DEFINE_CALL 'AUDIO_UP'(integer audio_channel) {
 	{
           AUDIA_SetVolumeFn (audio_channel, AUDIA_VOL_UP)
 	}
-
 }
 
 DEFINE_CALL 'AUDIO_DOWN'(integer audio_channel) {
@@ -415,7 +414,6 @@ DEFINE_CALL 'AUDIO_DOWN'(integer audio_channel) {
 	{
           AUDIA_SetVolumeFn (audio_channel, AUDIA_VOL_DOWN)
 	}
-
 }
 
 DEFINE_CALL 'AUDIO_START' {
@@ -424,9 +422,14 @@ DEFINE_CALL 'AUDIO_START' {
 	    
 	    send_string dvAudia1,"'SET 2 INPMUTE 22 5 0',10"
 	    send_string dvAudia1,"'SET 2 INPMUTE 22 6 0',10"
+}
 
-
-
+DEFINE_CALL 'MUTE_STATE_CHANGE' (integer audio_channel, integer button_channel) {
+    IF(uAudiaVol[audio_channel].nMute){
+	SEND_COMMAND dvTp612,"'!T',button_channel,'UNMUTE'"
+    } ELSE {
+	SEND_COMMAND dvTp612,"'!T',button_channel,'MUTE'"
+    }
 }
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
@@ -453,9 +456,9 @@ DATA_EVENT[dvAudia1]
 	Wait 10
 	{
 	    	    //Computer Volume
-	    AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', -18, 12)
+	    AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', 820, 112)
 	    //614 Mic
-	    AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', -18, 12)
+	    AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', 820, 1120)
 
 	    //////////////////////Room 612//////////////////////
 	    
@@ -464,13 +467,13 @@ DATA_EVENT[dvAudia1]
             //AUDIA_AssignVolumeParms (43, dvAUDIA1, 'SET 2 INPLVL 22 6 ', 'SET 2 INPMUTE 22 6 ', -18, 12 )
 
 	    //Computer Volume
-	    AUDIA_AssignVolumeParms (17, dvAUDIA1, 'SET 2 FDRLVL 17 1 ', 'SET 2 FDRMUTE 17 1 ', -18, 12)
+	    AUDIA_AssignVolumeParms (17, dvAUDIA1, 'SET 2 FDRLVL 17 1 ', 'SET 2 FDRMUTE 17 1 ', 820, 1120)
 	    //Podium Mic
-	    AUDIA_AssignVolumeParms (30, dvAUDIA1, 'SET 2 FDRLVL 30 1 ', 'SET 2 FDRMUTE 30 1 ', -18, 12)
+	    AUDIA_AssignVolumeParms (30, dvAUDIA1, 'SET 2 FDRLVL 30 1 ', 'SET 2 FDRMUTE 30 1 ', 820, 1120)
 	    //612 Wireless Mic
-	    AUDIA_AssignVolumeParms (21, dvAUDIA1, 'SET 2 FDRLVL 21 1 ', 'SET 2 FDRMUTE 21 1 ', -18, 12)
+	    AUDIA_AssignVolumeParms (21, dvAUDIA1, 'SET 2 FDRLVL 21 1 ', 'SET 2 FDRMUTE 21 1 ', 820, 1120)
 	    //612 Mixer for master volume
-	    AUDIA_AssignVolumeParms (32, dvAUDIA1, 'SET 2 FDRLVL 32 1 ', 'SET 2 FDRMUTE 32 1 ', -18, 12)
+	    AUDIA_AssignVolumeParms (32, dvAUDIA1, 'SET 2 FDRLVL 32 1 ', 'SET 2 FDRMUTE 32 1 ', 820, 1120)
 	}
     }
 }
@@ -905,6 +908,8 @@ BUTTON_EVENT[dvTp612,214]        // Vol Up
 	STACK_VAR INTEGER audio_channel 
 	audio_channel = 32
 	Call 'AUDIO_UP'(audio_channel)
+	SEND_LEVEL dvTp612,1,AUDIA_GetBgLvl(32)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,216)
     }
 }
 BUTTON_EVENT[dvTp612,215]        // Vol Down
@@ -913,9 +918,9 @@ BUTTON_EVENT[dvTp612,215]        // Vol Down
     { 
 	STACK_VAR INTEGER audio_channel 
 	audio_channel = 32
-   
 	Call 'AUDIO_DOWN'(audio_channel)
-     
+	SEND_LEVEL dvTp612,1,AUDIA_GetBgLvl(32)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,216)
     }
 }
 
@@ -926,16 +931,18 @@ BUTTON_EVENT[dvTp612,216]        // Vol Mute
 	STACK_VAR INTEGER audio_channel 
 	audio_channel = 32
 	CALL 'AUDIO_MUTE'(audio_channel)
-
+	SEND_LEVEL dvTp612,1,AUDIA_GetBgLvl(32)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,216)
     }
 }
 
 BUTTON_EVENT[dvTp612,217] {	 // Mute Wireless Mic
     PUSH : {
 	STACK_VAR INTEGER audio_channel
-	//audio_channel = 29
 	audio_channel = 21
 	Call 'AUDIO_MUTE'(audio_channel)
+	SEND_LEVEL dvTp612,3,AUDIA_GetBgLvl(21)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,217)
     }
 }
 BUTTON_EVENT[dvTp612,218] {	//Mute Podium Mic
@@ -943,6 +950,8 @@ BUTTON_EVENT[dvTp612,218] {	//Mute Podium Mic
 	STACK_VAR INTEGER audio_channel
 	audio_channel = 30
 	Call 'AUDIO_MUTE'(audio_channel)
+	SEND_LEVEL dvTp612,2,AUDIA_GetBgLvl(30)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,218)
     }
 }
 BUTTON_EVENT[dvTp612,219] {	//Mute Computer Vol
@@ -950,6 +959,8 @@ BUTTON_EVENT[dvTp612,219] {	//Mute Computer Vol
 	STACK_VAR INTEGER audio_channel
 	audio_channel = 17
 	Call 'AUDIO_MUTE'(audio_channel)
+	SEND_LEVEL dvTp612,4,AUDIA_GetBgLvl(17)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,219)
     }
 }
 BUTTON_EVENT[dvTp612,220] {	//Decrease Vol Wirless Mic
@@ -957,6 +968,8 @@ BUTTON_EVENT[dvTp612,220] {	//Decrease Vol Wirless Mic
 	STACK_VAR INTEGER audio_channel
 	audio_channel = 21
 	Call 'AUDIO_DOWN'(audio_channel)
+	SEND_LEVEL dvTp612,3,AUDIA_GetBgLvl(21)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,217)
     }
 
 }
@@ -965,6 +978,8 @@ BUTTON_EVENT[dvTp612,221] {	//Decrease Vol Podium Mic
 	STACK_VAR INTEGER audio_channel
 	audio_channel = 30
 	Call 'AUDIO_DOWN'(audio_channel)
+	SEND_LEVEL dvTp612,2,AUDIA_GetBgLvl(30)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,218)
     }
 
 }
@@ -974,6 +989,8 @@ BUTTON_EVENT[dvTp612,222] {	//Decrease Vol Computer
 	STACK_VAR INTEGER audio_channel
 	audio_channel = 17
 	Call 'AUDIO_DOWN'(audio_channel)
+	SEND_LEVEL dvTp612,4,AUDIA_GetBgLvl(17)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,219)
     }
 
 }
@@ -982,6 +999,8 @@ BUTTON_EVENT[dvTp612,223] {	//Increase Vol Wirless Mic
 	STACK_VAR INTEGER audio_channel
 	audio_channel = 21
 	Call 'AUDIO_UP'(audio_channel)
+	SEND_LEVEL dvTp612,3,AUDIA_GetBgLvl(21)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,217)
     }
 
 }
@@ -990,6 +1009,8 @@ BUTTON_EVENT[dvTp612,224] {	//Increase Vol Podium Mic
 	STACK_VAR INTEGER audio_channel
 	audio_channel = 30
 	Call 'AUDIO_UP'(audio_channel)
+	SEND_LEVEL dvTp612,2,AUDIA_GetBgLvl(30)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,218)
     }
 
 }
@@ -998,8 +1019,10 @@ BUTTON_EVENT[dvTp612,225] {	//Increase Vol Computer
 	STACK_VAR INTEGER audio_channel
 	audio_channel = 17
 	Call 'AUDIO_UP'(audio_channel)
+	SEND_LEVEL dvTp612,4,AUDIA_GetBgLvl(17)
+	Call 'MUTE_STATE_CHANGE'(audio_channel,219)
     }
-
+    
 }
 
 
@@ -1084,7 +1107,10 @@ If((time_to_hour(time) = 21)&&(time_to_minute(time) = 00)&&(nTimeBlock = 0))
 
 //Sets visual Audio level graph on touch screen
 SEND_LEVEL dvTp614,1,AUDIA_GetBgLvl(1)
-SEND_LEVEL dvTp612,2,AUDIA_GetBgLvl(2)
+SEND_LEVEL dvTp612,1,AUDIA_GetBgLvl(32)
+SEND_LEVEL dvTp612,2,AUDIA_GetBgLvl(30)
+SEND_LEVEL dvTp612,3,AUDIA_GetBgLvl(21)
+SEND_LEVEL dvTp612,4,AUDIA_GetBgLvl(17)
  
 
 (***********************************************************)
