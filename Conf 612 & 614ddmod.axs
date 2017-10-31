@@ -8,6 +8,10 @@ PROGRAM_NAME='Conf 612 & 614'
 (***********************************************************)
 (*          DEVICE NUMBER DEFINITIONS GO BELOW             *)
 (***********************************************************)
+// Device numbers are like x:y:z, where x is the device number
+//  (5001 is the AMX controller, 10001 is the 614 tablet, 10005
+//  is the 612 tablet), y is the port number (printed on back 
+//  of the controller), and z is the system number (0 is this system)
 DEFINE_DEVICE
 dvAudia1 	= 5001:1:0	//Biamp Nexia CS Straight Thru Cable 38400 Baud.				
 dvMatrix  	= 5001:2:0	//Extron 450
@@ -18,8 +22,6 @@ dvRelay	  	= 5001:21:0	//Relay for Rack Power.
 dvTp614	  	= 10001:1:0   	//MVP-8400 in the room with 1 Projectors.
 dvTp612	  	= 10005:1:0   	//MVP-8400 in the room with 2 Projector.
 
-
-//Dvtp1a = 10001:1:0
 (***********************************************************)
 (*               CONSTANT DEFINITIONS GO BELOW             *)
 (***********************************************************)
@@ -38,6 +40,50 @@ integer ProjCenter612 = 3
 integer ProjRight614 = 4
 integer ProjLeft614 = 5
 integer Proj614comb = 6
+
+// Matrix Switcher Video Inputs
+integer MxVin614RPodium = 1
+integer MxVin614LPodium = 2
+integer MxVin612RPodium = 3
+integer MxVin612LPodium = 4
+integer MxVin612Camera = 5
+integer MxVinDispComp = 6
+integer MxVinDish = 7
+integer MxVinAux = 8
+
+// Matrix Switcher Audio Inputs
+integer MxAin614RPodium = 1
+integer MxAin614LPodium = 2
+integer MxAin612RPodium = 3
+integer MxAin612LPodium = 4
+integer MxAinNexia = 5
+integer MxAinDish = 7
+integer MxAinAux = 8
+
+// Matrix Switcher Video Outputs
+integer MxVout614RProj = 1
+integer MxVout614LProj = 2
+integer MxVout612Proj = 3
+integer MxVoutDispScreens = 4
+integer MxVoutArrayScreen = 5
+integer MxVout607A = 6
+integer MxVout607B = 7
+integer MxVoutEcho360 = 8
+integer MxVoutAux = 9
+
+// Matrix Switcher Video Inputs
+integer MxAout614CompOut = 1
+integer MxAout612CompOut = 3
+integer MxAoutDispScreens = 4
+integer MxAoutArrayScreen = 5
+integer MxAout607A = 6
+integer MxAoutEcho360 = 8
+integer MxAoutAuxRCA = 9
+integer MxAoutAux = 10
+
+Char MxModeBoth = '!'
+Char MxModeVideo = '&'
+Char MxModeAudio = '$'
 
 integer nPC = 3
 integer nRight = 5
@@ -136,6 +182,9 @@ RUN1
 RUN2
 RUN3
 
+widechar InStr[3]
+widechar OutStr[2]
+widechar Signal[7]
 (***********************************************************)
 (*               LATCHING DEFINITIONS GO BELOW             *)
 (***********************************************************)
@@ -151,9 +200,14 @@ DEFINE_MUTUALLY_EXCLUSIVE
 (***********************************************************)
 (* EXAMPLE: DEFINE_FUNCTION <RETURN_TYPE> <NAME> (<PARAMETERS>) *)
 (* EXAMPLE: DEFINE_CALL '<NAME>' (<PARAMETERS>) *)
+// NOTE Sending a string to 0:1:0 (essentially the loopback device)
+//  cause the string to be printed over telnet
 INCLUDE 'AMX_ArrayLib.axi'
 INCLUDE 'nAMX_QUEUE.axi'
 INCLUDE 'Biamp_Audia.axi'
+INCLUDE 'UnicodeLib.axi'
+// Turns power relays on or off. In our implementation, turns
+//  the speakers on/off
 DEFINE_CALL 'Power Relay'(integer Relay,integer nRoom)	//1 = 612 2 = 614
 {
     PowerState[nRoom] = Relay
@@ -182,111 +236,101 @@ DEFINE_CALL 'Power Relay'(integer Relay,integer nRoom)	//1 = 612 2 = 614
 	}
     }
 }
+
+// Turns projectors on or off
 DEFINE_CALL 'Proj Power'(integer Proj_Num, char Proj_Control[10]) //Projector Control Sub.
 {
     SELECT
     {
-	ACTIVE(Proj_Num = 3):			//612_proj
+	ACTIVE(Proj_Num = ProjCenter612):			//612_proj
 	{
 	    SELECT
 	    {
 		ACTIVE(Proj_Control = 'PON'):
 		{
-		    //IF(PROJ_POWER1 = 0)
-		    //{
-			SEND_STRING dvProj612,"'PWR ON',$0D"
-			(*WAIT 25
-			{
-			    RUN1 = 1
-			}*)
-		   //}
+		    SEND_STRING dvProj612,"'PWR ON',$0D"
 		}
 		ACTIVE(Proj_Control = 'POF'):
 		{
-		    //IF(PROJ_POWER1 = 1)
-		    //{
-			SEND_STRING dvProj612,"'PWR OFF',$0D"
-			(*RUN1 = 0*)
-		    //}
+		    SEND_STRING dvProj612,"'PWR OFF',$0D"
 		}
 	    }
 	}
-	ACTIVE(Proj_Num = 4):			//614R
+	ACTIVE(Proj_Num = ProjRight614):			//614R
 	{
 	    SELECT
 	    {
 		ACTIVE(Proj_Control = 'PON'):
 		{
-		    IF(PROJ_POWER2 = 0)
-		    {
+//		    IF(PROJ_POWER2 = 0)
+//		    {
 			SEND_STRING dvProj614Rt,'(PWR1)'
 			WAIT 25
 			{
 			    RUN2 = 1
 			}
-		    }
+//		    }
 		}
 		ACTIVE(Proj_Control = 'POF'):
 		{
-		    IF(PROJ_POWER2 = 1)
-		    {
+//		    IF(PROJ_POWER2 = 1)
+//		    {
 			SEND_STRING dvProj614Rt,'(PWR0)'
 			RUN2 = 0
-		    }
+//		    }
 		}
 	    }
 	}
-	ACTIVE(Proj_Num = 5):			//614left
+	ACTIVE(Proj_Num = ProjLeft614):			//614left
 	{
 	    SELECT
 	    {
 		ACTIVE(Proj_Control = 'PON'):
 		{
-		    IF(PROJ_POWER3 = 0)
-		    {
+//		    IF(PROJ_POWER3 = 0)
+//		    {
 			SEND_STRING dvProj614Lt,'(PWR1)'
 			WAIT 25
 			{
 			    RUN3 = 1
 			}
-		    }
+//		    }
 		}
 		ACTIVE(Proj_Control = 'POF'):
 		{
-		    IF(PROJ_POWER3 = 1)
-		    {
+//		    IF(PROJ_POWER3 = 1)
+//		    {
 			SEND_STRING dvProj614Lt,'(PWR0)'
 			RUN3 = 0
-		    }
+//		    }
 		}
 	    }
 	}
-	ACTIVE(Proj_Num = 6):			//BOTH
+	ACTIVE(Proj_Num = Proj614comb):			//BOTH
 	{
 	    SELECT
 	    {
 		ACTIVE(Proj_Control = 'PON'):
 		{
-		    IF(PROJ_POWER2 = 0)
-		    {
+//		    IF(PROJ_POWER2 = 0)
+//		    {
 			SEND_STRING dvProj614Rt,'(PWR1)'
 			WAIT 25
 			{
 			    RUN2 = 1
 			}
-		    }
-		    IF(PROJ_POWER3 = 0)
-		    {
+//		    }
+//		    IF(PROJ_POWER3 = 0)
+//		    {
 			SEND_STRING dvProj614Lt,'(PWR1)'
 			WAIT 25
 			{
 			    RUN3 = 1
 			}
-		    }
+//		    }
 		}
 		ACTIVE(Proj_Control = 'POF'):
 		{
-		    
 		    SEND_STRING dvProj614Rt,'(PWR0)'
 		    SEND_STRING dvProj614Lt,'(PWR0)'
 		    RUN2 = 0
@@ -296,7 +340,9 @@ DEFINE_CALL 'Proj Power'(integer Proj_Num, char Proj_Control[10]) //Projector Co
 	}
     }
 }
-DEFINE_CALL 'Proj Control'(integer Proj_Num, char Proj_Control[10]) //Projector Control Sub.
+// Switches the given projector's input to the given source
+// NOTE This subroutine is _never_ used
+DEFINE_CALL 'Proj Control'(integer Proj_Num, char Proj_Control[10])
 {
     LOCAL_VAR CHAR CMD[10]
     DISPLAY = Proj_Num
@@ -304,50 +350,44 @@ DEFINE_CALL 'Proj Control'(integer Proj_Num, char Proj_Control[10]) //Projector 
     {
 	ACTIVE(Proj_Control = 'VID1'):
 	{
-	    //SEND_STRING dvProjB,'(SRC2)'
 	    CMD = '(SRC2)' 
 	}
 	ACTIVE(Proj_Control = 'VID2'):
 	{
-	    //SEND_STRING dvProjB,'(SRC3)'
 	    CMD = '(SRC3)'
 	}
 	ACTIVE(Proj_Control = 'VID3'):
 	{
-	    //SEND_STRING dvProjB,'(SRC4)'
 	    CMD = '(SRC4)'
 	}
 	ACTIVE(Proj_Control = 'RGB1'):
 	{
-	    //SEND_STRING dvProjB,"'(SRC0)'"
 	    CMD = '(SRC0)'
 	}
 	ACTIVE(Proj_Control = 'RGB2'): 
 	{
-	    //SEND_STRING dvProjB,"'(SRC1)'"
 	    CMD = '(SRC1)'
 	}
 	ACTIVE(Proj_Control = 'RGB3'):
 	{
-	    //SEND_STRING dvProjB,"'(SRC5)'"
 	    CMD = '(SRC5)'
 	}
     }
     SELECT
     {
-	ACTIVE(Proj_Num = 3):
+	ACTIVE(Proj_Num = ProjCenter612):
+	{
+	    SEND_STRING dvProj612,CMD
+	}
+	ACTIVE(Proj_Num = ProjRight614):
 	{
 	    SEND_STRING dvProj614Rt,CMD
 	}
-	ACTIVE(Proj_Num = 4):
-	{
-	    SEND_STRING dvProj614Rt,CMD
-	}
-	ACTIVE(Proj_Num = 5):
+	ACTIVE(Proj_Num = ProjLeft614):
 	{
 	    SEND_STRING dvProj614Lt,CMD
 	}
-	ACTIVE(Proj_Num = 6):
+	ACTIVE(Proj_Num = Proj614comb):
 	{
 	    SEND_STRING dvProj614Rt,CMD
 	    SEND_STRING dvProj614Lt,CMD
@@ -355,6 +395,14 @@ DEFINE_CALL 'Proj Control'(integer Proj_Num, char Proj_Control[10]) //Projector 
     }
 }
 
+DEFINE_CALL 'Matrix Tie'(integer MxIn, integer MxOut, Char MxAV[])
+{
+    InStr = CH_TO_WC(FORMAT('%02d*',MxIn))
+    OutStr = CH_TO_WC(FORMAT('%02u',MxOut))
+    Signal = WC_CONCAT_STRING(InStr,WC_CONCAT_STRING(OutStr,CH_TO_WC(MxAV)))
+    
+    SEND_STRING dvMatrix,WC_TO_CH(Signal)
+}
 
 DEFINE_CALL 'Matrix'(integer nIn,integer nOut,Char Clvl)	//! = A&V, & = Video, $ = Audio
 {
@@ -366,7 +414,7 @@ DEFINE_CALL 'System Off'(Char nRoom[3])
     If(nRoom = '612')
     {
 	Call 'Proj Power'(ProjCenter612,'POF')
-	AUDIA_SetVolumeFn (2, AUDIA_VOL_MUTE)
+	AUDIA_SetVolumeFn (2, AUDIA_VOL_MUTE) 
 	AUDIA_SetVolumeFn (6, AUDIA_VOL_MUTE)
 	Call'Power Relay'(0,1)
     }
@@ -374,7 +422,7 @@ DEFINE_CALL 'System Off'(Char nRoom[3])
     {
 	Call 'Proj Power'(ProjLeft614,'POF')
 	Call 'Proj Power'(ProjRight614,'POF')
-	AUDIA_SetVolumeFn (1, AUDIA_VOL_MUTE)
+	AUDIA_SetVolumeFn (1, AUDIA_VOL_MUTE) 
 	AUDIA_SetVolumeFn (5, AUDIA_VOL_MUTE)
 	Call'Power Relay'(0,2)
     }
@@ -417,11 +465,22 @@ DEFINE_CALL 'AUDIO_DOWN'(integer audio_channel) {
 }
 
 DEFINE_CALL 'AUDIO_START' {
-	    send_string dvAudia1,"'SET 2 INPMUTE 22 9 0',10"
-	    send_string dvAudia1,"'SET 2 INPMUTE 22 10 0',10"
+	    send_string dvAudia1,"'SET 2 INPMUTE 22 9 0',10" // 614 Computer L
+	    send_string dvAudia1,"'SET 2 INPMUTE 22 10 0',10" // 614 Coimputer R
 	    
-	    send_string dvAudia1,"'SET 2 INPMUTE 22 5 0',10"
-	    send_string dvAudia1,"'SET 2 INPMUTE 22 6 0',10"
+	    send_string dvAudia1,"'SET 2 INPMUTE 22 5 0',10" // 612 Computer L
+	    send_string dvAudia1,"'SET 2 INPMUTE 22 6 0',10" // 612 Computer R
+	    
+	    // Initialize Default Matrix Ties
+	    // Podium, Room audio to echo
+	    Call 'Matrix'(MxVin612RPodium,MxVoutEcho360,MxModeVideo)
+	    Call 'Matrix'(MxAinNexia,MxAoutEcho360,MxModeAudio)
+	    // Podium Audio to Nexia
+	    Call 'Matrix'(MxAin612RPodium,MxAout612CompOut,MxModeAudio)
+	    // Overflow Audio/Video
+	    Call 'Matrix'(MxVin612RPodium,MxVout607A,MxModeVideo)
+	    Call 'Matrix'(MxAinNexia,MxAout607A,MxModeAudio)
+	    Call 'Matrix'(MxVin612Camera,MxVout607B,MxModeVideo)
 }
 
 DEFINE_CALL 'MUTE_STATE_CHANGE' (integer audio_channel, integer button_channel) {
@@ -455,7 +514,7 @@ DATA_EVENT[dvAudia1]
 	SEND_COMMAND dvAudia1,"'SET BAUD 38400,8,N,1'"
 	Wait 10
 	{
-	    	    //Computer Volume
+	    //Computer Volume
 	    AUDIA_AssignVolumeParms (19, dvAUDIA1, 'SET 2 FDRLVL 19 1 ', 'SET 2 FDRMUTE 19 1 ', 820, 112)
 	    //614 Mic
 	    AUDIA_AssignVolumeParms (20, dvAUDIA1, 'SET 2 FDRLVL 20 1 ', 'SET 2 FDRMUTE 20 1 ', 820, 1120)
@@ -480,6 +539,7 @@ DATA_EVENT[dvAudia1]
 
 DATA_EVENT[dvMatrix]
 {
+    // Matrix Switcher Initialization
     Online:
     {
 	SEND_COMMAND dvMatrix,"'SET BAUD 9600,8,N,1'"
@@ -624,11 +684,11 @@ BUTTON_EVENT[dvTpBoth,nBtnPodiumLoc]
                 {
                     Case nRight:
                     {
-                        nPodiumLocation[(get_last(dvTpBoth))] = 3       //3 is the sw input #
+                        nPodiumLocation[(get_last(dvTpBoth))] = MxVin612RPodium       //3 is the sw input #
                     }
                     Case nLeft:
                     {
-                        nPodiumLocation[(get_last(dvTpBoth))] = 4       //4 is the sw input #
+                        nPodiumLocation[(get_last(dvTpBoth))] = MxVin612LPodium       //4 is the sw input #
                     }
                 }    
             }
@@ -638,11 +698,11 @@ BUTTON_EVENT[dvTpBoth,nBtnPodiumLoc]
                 {
                     Case nRight:
                     {
-                        nPodiumLocation[(get_last(dvTpBoth))] = 1       //1 is the sw input #
+                        nPodiumLocation[(get_last(dvTpBoth))] = MxVin614RPodium       //1 is the sw input #
                     }
                     Case nLeft:
                     {
-                        nPodiumLocation[(get_last(dvTpBoth))] = 2       //2 is the sw input #
+                        nPodiumLocation[(get_last(dvTpBoth))] = MxVin614LPodium       //2 is the sw input #
                     }
                 }
             }
@@ -669,8 +729,8 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			Case nPC:
 			{
 			    
-			    Call 'Matrix'(nPodiumLocation[2],2,'&') //VIDEO
-			    Call 'Matrix'(nPodiumLocation[2],1,'$') //AUDIO
+			    Call 'Matrix'(nPodiumLocation[2],MxVout614LProj,MxModeVideo) //VIDEO
+			    Call 'Matrix'(nPodiumLocation[2],MxAout614CompOut,MxModeAudio) //AUDIO
 			}
 		    }
 		}
@@ -689,8 +749,8 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			Case nPC:
 			{
 			    
-			    Call 'Matrix'(nPodiumLocation[2],1,'&')//VIDEO
-			    Call 'Matrix'(nPodiumLocation[2],1,'$')//AUDIO
+			    Call 'Matrix'(nPodiumLocation[2],MxVout614RProj,MxModeVideo)//VIDEO
+			    Call 'Matrix'(nPodiumLocation[2],MxAout614CompOut,MxModeAudio)//AUDIO
 			}
 		    }
 		}
@@ -713,9 +773,9 @@ BUTTON_EVENT[dvTpBoth,nBtnDest]	//Select Left/Right/Both Projs
 			Case nPC:
 			{
 
-			    Call 'Matrix'(nPodiumLocation[2],1,'&')//VIDEO
-			    Call 'Matrix'(nPodiumLocation[2],2,'&')//VIDEO
-			    Call 'Matrix'(nPodiumLocation[2],1,'$')//AUDIO
+			    Call 'Matrix'(nPodiumLocation[2],MxVout614LProj,MxModeVideo)//VIDEO
+			    Call 'Matrix'(nPodiumLocation[2],MxVout614RProj,MxModeVideo)//VIDEO
+			    Call 'Matrix'(nPodiumLocation[2],MxAout614CompOut,MxModeAudio)//AUDIO
 			}
 		    }
 		}
@@ -734,11 +794,11 @@ BUTTON_EVENT[dvTpBoth,nSrcSelects]
             {
                 CALL 'Proj Power'(ProjCenter612,'PON')
             }
-	    Call 'Matrix'(nPodiumLocation[1],3,'!')
-	    Call 'Matrix'(nPodiumLocation[1],6,'&')
-	     Call 'Matrix'(nPodiumLocation[1],8,'&')
-	    Call 'Matrix'(5,6,'$')
-	    Call 'Matrix'(5,8,'$')
+	    Call 'Matrix'(nPodiumLocation[1],MxVout612Proj,MxModeBoth)
+	    Call 'Matrix'(nPodiumLocation[1],MxVout607A,MxModeVideo)
+	     Call 'Matrix'(nPodiumLocation[1],MxVoutEcho360,MxModeVideo)
+	    Call 'Matrix'(MxAinNexia,MxAout607A,MxModeAudio)
+	    Call 'Matrix'(MxAinNexia,MxAoutEcho360,MxModeAudio)
            
         }
         nCurrentSource[get_last(dvTpBoth)] = nPC
@@ -751,15 +811,21 @@ BUTTON_EVENT[dvTpBoth,nBtnPwrOff]
 {
     Push:
     {
-	Switch (get_last(dvTpBoth))
+	if(RoomCombineMode=1)
 	{
-	    Case 1:
+	    Call 'System Off'('612')
+	    Call 'System Off'('614')
+	} else {
+	    Switch (get_last(dvTpBoth))
 	    {
-		Call 'System Off'('612')
-	    }
-	    Case 2:
-	    {
-		Call 'System Off'('614')
+		Case 1:
+		{
+		    Call 'System Off'('612')
+		}
+		Case 2:
+		{
+		    Call 'System Off'('614')
+		}
 	    }
 	}
     }
@@ -794,6 +860,10 @@ BUTTON_EVENT[dvTp612,nRoomMode]
 	    {
 		RoomCombineMode = 0
 		//SEND_COMMAND dvTp612,"'PPOF-Room in use'"
+		// Podium to projector
+		Call 'Matrix Tie'(MxVin614RPodium,MxVout614LProj,MxModeVideo)
+		Call 'Matrix Tie'(MxVin614RPodium,MxVout614RProj,MxModeVideo)
+		Call 'Matrix Tie'(MxVin612RPodium,MxVout612Proj,MxModeVideo)
 		//Mute All First
 		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 1 0',10"
 		send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 2 0',10"
@@ -806,6 +876,10 @@ BUTTON_EVENT[dvTp612,nRoomMode]
 	    }
 	    Case 13:	//Expanded or Combined
 	    {
+		    // Podium to projectors
+		    Call 'Matrix Tie'(MxVin612RPodium,MxVout614RProj,MxModeVideo)
+		    Call 'Matrix Tie'(MxVin612RPodium,MxVout614LProj,MxModeVideo)
+		    Call 'Matrix Tie'(MxVin612RPodium,MxVout612Proj,MxModeVideo)
 		    //Mute All First
 		    send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 1 0',10"
 		    send_string dvAudia1,"'SET 2 RTRMUTEXP 33 1 2 0',10"
@@ -1024,7 +1098,11 @@ BUTTON_EVENT[dvTp612,225] {	//Increase Vol Computer
     }
     
 }
-
+BUTTON_EVENT[dvTp612,6] { // Cancel auto-shutdown
+    PUSH: {
+	TIMELINE_KILL(TL1)
+    }
+}
 
 
 
@@ -1032,8 +1110,8 @@ BUTTON_EVENT[dvTp612,225] {	//Increase Vol Computer
 TIMELINE_EVENT[TL1] // capture all events for Timeline 1 
 { 
     send_string 0:1:0,"itoa(OffTime-timeline.sequence),13,10"
-    send_command dvTp612,"'@TXT',2,itoa(OffTime-timeline.sequence)"
-    send_command dvTp614,"'@TXT',2,itoa(OffTime-timeline.sequence)"
+    send_command dvTp612,"'!T',2,itoa(OffTime-timeline.sequence)"
+    send_command dvTp614,"'!T',2,itoa(OffTime-timeline.sequence)"
     Send_command dvTp612,"'beep'"
     Send_command dvTp614,"'beep'"
     switch(Timeline.Sequence) // which time was it? 
@@ -1089,7 +1167,7 @@ TIMELINE_EVENT[TL2] // capture all events for Timeline 2
 
 
 DEFINE_PROGRAM
-If((time_to_hour(time) = 21)&&(time_to_minute(time) = 00)&&(nTimeBlock = 0))
+If((time_to_hour(time) = 22)&&(time_to_minute(time) = 00)&&(nTimeBlock = 0))
 {
     send_string 0:1:0,"'the time is ',time,13,10"
     nTimeBlock = 1		//Keeps this from running over and over for the whole minute.
